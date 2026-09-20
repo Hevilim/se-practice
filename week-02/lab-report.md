@@ -103,25 +103,38 @@ no external libraries. Return code plus a short explanation.
 **What I appended to Prompt B:**
 
 ```
-
+Example: analyze_marks([40, 60, 80], 50) → average 60, highest 80, lowest 40,
+pass_rate 66.67. Include tests for: one mark, decimals, custom pass_mark, empty list,
+text value, and marks below 0 or above 100. State any remaining assumptions before
+the code.
 ```
 
 **Tests the AI wrote for itself** — how many, and which situations do they cover?
+21 tests.
 
 | Situation | Covered by the AI's tests? |
 | --- | --- |
-| one mark | |
-| decimals | |
-| custom pass_mark | |
-| empty list | |
-| text value | |
-| below 0 / above 100 | |
+| one mark | yes |
+| decimals | yes |
+| custom pass_mark | yes |
+| empty list | yes |
+| text value | yse |
+| below 0 / above 100 | yes |
 
-**Do the AI's own tests pass against the AI's own code?** yes / no
+**Do the AI's own tests pass against the AI's own code?** yes 
 
-**Do they agree with the harness in section 6?** yes / no — if no, where do they disagree:
+**Do they agree with the harness in section 6?** no — the AI raises `TypeError` for a text value,
+but Prompt B raised `ValueError` for the same case. The AI chose the error type itself, so the
+harness may expect a different one. It also decided that `bool` and a string input are errors.
 
 **Assumptions C stated explicitly before the code:**
+
+1. Marks must be between 0 and 100
+2. Default pass mark is 50
+3. `pass_mark` is inclusive (mark >= pass_mark)
+4. average and pass_rate are rounded to 2 decimals
+5. pass_rate is a percent, 0..100
+6. `TypeError` for wrong type, `ValueError` for wrong value
 
 ---
 
@@ -130,16 +143,25 @@ no external libraries. Return code plus a short explanation.
 **The complete prompt I wrote** (one message, sent to a fresh chat):
 
 ```
-
+Write a Python function called analyze_marks(marks, pass_mark=50). It takes a list or tuple of numbers from 0 to 100, and a pass_mark from 0 to 100. A mark passes if it is greater than or equal to pass_mark, so a mark exactly equal to pass_mark counts as a pass. The function returns a dict with four keys: average, highest, lowest and pass_rate. Average is the mean rounded to 2 decimals, pass_rate is the percent of marks that passed rounded to 2 decimals, and highest and lowest are the raw values. If the list is empty, or a value is not a number (text, None or bool), or a mark is below 0 or above 100, or pass_mark is not a number or is outside 0 to 100, raise ValueError with a clear message. Always ValueError, never TypeError. Do not print, do not read files, do not use input, use only the standard library, and do not change the input list. It is one flat list of marks, no student names and no CSV. For example analyze_marks([40, 60, 80], 50) returns average 60.0, highest 80, lowest 40, pass_rate 66.67, and analyze_marks([50, 49], 50) returns pass_rate 50.0 because 50 is a pass. Also write unittest tests for one mark, decimal marks, a custom pass_mark, a mark equal to pass_mark, an empty list, a text value, a mark below 0 and a mark above 100. Put the function and the tests in one file and write no explanation before or after the code.
 ```
 
 **What I deliberately added that A, B and C did not have:**
 
-1.
-2.
-3.
+1. One error type for everything — always ValueError, never TypeError
+2. A second example that shows the boundary case (50 with pass_mark 50)
+3. Clear bans: no print, no files, no input(), standard library only
+4. The input list must not be changed
+5. bool is not a number and must raise an error
 
 **The ambiguity I found in the specification, and how I resolved it inside Prompt D:**
+The example `analyze_marks([40, 60, 80], 50) -> pass_rate 66.67` does not say what happens when a
+mark is exactly equal to pass_mark. There is no 50 in that list, so the answer is 66.67 with `>=`
+and also with `>`. The example looks complete but it hides this case. I resolved it in Prompt D: a
+mark passes when `mark >= pass_mark`, and I added a second example `analyze_marks([50, 49], 50)`
+with pass_rate 50.0 to prove it.
+A second gap: Prompt B raised ValueError for a text value, Prompt C raised TypeError for the same
+input. Nobody said which one is right. I fixed it to ValueError everywhere.
 
 ---
 
