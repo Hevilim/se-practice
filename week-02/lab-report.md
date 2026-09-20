@@ -39,45 +39,62 @@ n/a — used Python
 **Prompt sent** (should be exactly one sentence):
 
 ```
-
+Write Python code to analyze student marks.
 ```
 
 **Assumptions the AI made that I never gave it** — list them, one per line. A data format, a pass
 threshold, a rounding rule, an input method, an invented feature all count.
 
-1.
-2.
-3.
+1. CSV file as input
+2. Pass mark = 60
+3. Grades A, B, C, D, F
+4. 6 fake students
+5. Prints tables, returns nothing
+6. Extra stats I never asked for
 
 **Questions it should have asked and did not:**
 
-1.
-2.
+1. What is the input?
+2. Return or print?
+3. What mark is a pass?
+4. What name for the function?
 
-**Is the function named `analyze_marks` with the required signature?** yes / no — if no, what is it
-called:
+**Is the function named `analyze_marks` with the required signature?** no, it is 
+called: "report
 
 **First impression before testing** (one sentence — you will compare this with section 6 later):
+Looked long and nice, so I thought it was not bad but there are some mistakes.
 
 ---
+
 
 ## 3. Prompt B — structured context
 
 **Prompt sent** (paste it in full, including any substitutions):
 
 ```
-
+You are a Python developer. Implement analyze_marks(marks, pass_mark=50). Return
+average, highest, lowest, and pass_rate in a dictionary. Accept marks from 0 to 100;
+raise ValueError for an empty list, non-numeric values, or out-of-range values. Use
+no external libraries. Return code plus a short explanation.
 ```
 
 **What B fixed compared to A:**
 
-1.
-2.
+1. Correct name `analyze_marks` and a clear signature
+2. Input is a list of numbers, not a CSV file
+3. Returns a dict, does not print
+4. Pass mark is a parameter, not a guess
+5. Checks empty list, bad types and range 0..100
 
 **What B still leaves open:**
 
-1.
-2.
+1. Rounding — it chose 2 decimals by itself
+2. `pass_mark=50` default was its own choice
+3. Is 0..100 the only valid range?
+4. Should `pass_rate` be a percent or 0..1?
+5. Error type — `ValueError` was not asked for
+6. No subjects, only one flat list
 
 ---
 
