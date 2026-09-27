@@ -1,0 +1,63 @@
+# week-03/submission.yml — your declaration for this lab.
+#
+# Facts only. Every explanation goes in lab-report.md; nothing here repeats prose.
+# Fill every value. Check it before you push:
+#
+#     python tests/validate_submission.py
+#
+# The validator checks shape, never quality. A green run is the floor, not the grade.
+# If you cannot run Python, fill the file by hand against the comments — a malformed
+# file costs you nothing if the content is there.
+
+schema: 1
+week: "03"
+
+student:
+  name: Karim Aliyev
+  student_id: 24B031620  # as in KBTU records, e.g. 24B031016
+  github: Hevilim        # your GitHub username, the one that owns the repo
+
+assistant:
+  tool: Claude (claude.ai)  # e.g. ChatGPT, Claude, Gemini, Copilot
+  model: Claude Opus 5.5    # the exact model name with its version. "ChatGPT" is not a model name.
+
+counts:
+  user_stories: 6          # how many stories you kept after your review (the task asks for 6-8)
+  acceptance_criteria_sets: 3   # how many stories you wrote Given/When/Then criteria for
+
+checker:
+  # Numbers from YOUR last run of: python tests/check_requirements.py
+  # They must add up to the number of checks it runs. Report them as they came out.
+  # A FAIL you report and explain in lab-report.md costs you nothing. A hidden one costs the criterion.
+  pass: 23
+  fail: 0
+  error: 0
+  commit: b80087b      # the commit you ran the checker at: git rev-parse --short HEAD
+                       # (normally the commit just before you commit this file — that is fine)
+
+assumptions:
+  # The scenario does not settle these two. Decide, declare, and defend the decision in lab-report.md.
+  # Either answer is acceptable. Not deciding is not.
+  overlap_touching_bookings: allowed   # allowed | not-allowed   (a booking ending 14:00 and one starting 14:00)
+  exactly_two_hours: allowed           # allowed | not-allowed   (a booking of exactly the maximum length)
+
+traceability:
+  # Use the IDs from requirements/traceability.md. Empty lists are allowed — if you claim full
+  # coverage, the checker and I will test that claim.
+  use_cases_not_covered: [UC-01, UC-05]    # e.g. [UC-05, UC-06]
+  stories_not_traced: []       # e.g. [US-09]
+
+review_findings:
+  # Three or more. One line each, and each one names the ID it is about.
+  # Worthless: "the AI made mistakes".
+  # Worth everything: "UC-06 Send confirmation had no story behind it until I wrote US-07".
+  - UC-06 Send confirmation was linked to Student in the generated diagram; no person triggers it, so the link was removed and UC-06 is reached only by include from UC-02 and UC-03
+  - US-05 as generated said rooms are blocked for maintenance and that blocking cancels existing bookings and notifies students; both are outside the scenario and were removed
+  - US-01 as generated assumed students are signed in with a campus account; authentication is out of scope, so the assumption was replaced
+  - US-03 absorbed the generated story See my bookings, and the generated story Manage the list of rooms was deleted; neither is one of UC-01 to UC-06
+  - AC-01 and AC-05 were added because the generated criteria settled the two-hour and touching-booking questions in assumptions but never tested them
+  - UC-01 and UC-05 have stories (US-01, US-06) but no acceptance criteria at all
+
+honesty:
+  can_explain_everything_submitted: yes   # yes | no   — "no" is an accepted answer, name the part in lab-report.md
+  ai_usage_disclosed: yes                 # yes | no   — AI_USAGE.md is required every week
