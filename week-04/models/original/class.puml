@@ -1,0 +1,71 @@
+@startuml
+hide circle
+skinparam classAttributeIconSize 0
+
+enum BookingStatus {
+  ACTIVE
+  CANCELLED
+}
+
+enum ConfirmationType {
+  BOOKED
+  CANCELLED
+}
+
+class Student {
+  - studentId : String
+  - name : String
+  - email : String
+  + viewAvailability(day : Date) : List<Room>
+  + bookRoom(room : Room, start : DateTime, end : DateTime) : Booking
+  + cancelBooking(booking : Booking) : void
+}
+
+class Administrator {
+  - adminId : String
+  - name : String
+  + blockRoom(room : Room) : void
+  + unblockRoom(room : Room) : void
+  + reviewUsage(from : Date, to : Date) : UsageReport
+}
+
+class Room {
+  - roomId : String
+  - name : String
+  - capacity : int
+  - blocked : boolean
+  + isAvailable(start : DateTime, end : DateTime) : boolean
+  + block() : void
+  + unblock() : void
+}
+
+class Booking {
+  - bookingId : String
+  - start : DateTime
+  - end : DateTime
+  - status : BookingStatus
+  + cancel() : void
+  + overlaps(other : Booking) : boolean
+  + durationHours() : double
+}
+
+class Confirmation {
+  - confirmationId : String
+  - type : ConfirmationType
+  - sentAt : DateTime
+}
+
+class UsageReport {
+  - from : Date
+  - to : Date
+  - hoursPerRoom : Map<Room, double>
+}
+
+Student "1" -- "0..*" Booking : makes >
+Room "1" -- "0..*" Booking : is reserved by >
+Booking "1" -- "1..2" Confirmation : produces >
+Booking --> BookingStatus
+Confirmation --> ConfirmationType
+Administrator "1..*" -- "0..*" Room : blocks / unblocks >
+Administrator ..> UsageReport : generates
+@enduml
