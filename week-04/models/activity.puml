@@ -1,0 +1,36 @@
+@startuml
+title Book room (revised)
+
+|Student|
+start
+:Choose room, start time and end time;
+:Submit booking request;
+
+|Smart Campus|
+if (Start in future and 0 < duration <= 2 h? (R1)) then ([no])
+  :Reject booking - invalid time range (R1);
+  stop
+else ([yes])
+endif
+
+if (Room blocked? (R3)) then ([yes])
+  :Reject booking - room is blocked (R3);
+  stop
+else ([no])
+endif
+
+if (Overlaps an ACTIVE booking of the same room? (R2)) then ([yes])
+  :Reject booking - time slot is taken (R2);
+  note right
+    Time is [start, end):
+    a booking that ends at 12:00 and one
+    that starts at 12:00 do not overlap (A1).
+  end note
+  stop
+else ([no])
+endif
+
+:Create booking with status ACTIVE;
+:Issue confirmation to the student (R4);
+stop
+@enduml
