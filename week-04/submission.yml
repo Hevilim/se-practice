@@ -1,0 +1,55 @@
+# week-04/submission.yml — your declaration for this lab.
+#
+# Facts only. Every explanation goes in lab-report.md; nothing here repeats prose.
+# Fill every value. Check it before you push:
+#
+#     python tests/validate_submission.py
+#
+# The validator checks shape, never quality. A green run is the floor, not the grade.
+# If you cannot run Python, fill the file by hand against the comments — a malformed
+# file costs you nothing if the content is there.
+
+schema: 1
+week: "04"
+
+student:
+  name: Karim Aliyev
+  student_id: 24B031620
+  github: Hevilim
+
+assistant:
+  tool: Claude
+  model: Claude Opus 5.5
+
+counts:
+  behaviour_diagram: activity
+  stories_source: week-03
+  use_cases: 6
+  change_log_rows: 7
+
+checker:
+  # Numbers from YOUR last run of: python tests/check_models.py
+  pass: 35
+  fail: 0
+  error: 0
+  commit: COMMIT_HASH       # git rev-parse --short HEAD
+  kept_fails: []
+
+assumptions:
+  overlap_touching_bookings: allowed
+  blocking_a_booked_room: keep-bookings
+
+traceability:
+  use_cases_not_traced: []
+  rules_not_shown: []
+
+review_findings:
+  - "Send confirmation was a use case included from Book room and Cancel own booking; R4 makes it an outcome, not a goal - removed"
+  - "Administrator 1..* -- 0..* Room said every room needs an administrator; no story stores who blocks a room (US-05) - class removed"
+  - "Booking 1 -- 1..2 Confirmation modelled a cancel confirmation; out of scope this week, only R4 booking confirmation - changed to 1 / 1"
+  - "Activity decision Overlaps an active booking did not say same room; R2 is per room - changed to Overlaps an ACTIVE booking of the same room? (R2)"
+
+honesty:
+  originals_unedited: yes
+  can_explain_everything_submitted: no
+  ai_usage_disclosed: yes
