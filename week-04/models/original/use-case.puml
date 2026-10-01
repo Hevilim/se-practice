@@ -1,0 +1,28 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor Student
+actor Administrator
+
+rectangle "Smart Campus Room Booking System" {
+  usecase "View room availability" as UC1
+  usecase "Book room" as UC2
+  usecase "Cancel own booking" as UC3
+  usecase "Send confirmation" as UC4
+  usecase "Block room" as UC5
+  usecase "Unblock room" as UC6
+  usecase "Review room usage" as UC7
+}
+
+Student --> UC1
+Student --> UC2
+Student --> UC3
+
+Administrator --> UC5
+Administrator --> UC6
+Administrator --> UC7
+
+UC2 ..> UC4 : <<include>>
+UC3 ..> UC4 : <<include>>
+@enduml

@@ -1,0 +1,48 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+title Smart Campus - use cases (revised)
+
+actor Student
+actor Administrator
+
+rectangle "Smart Campus Room Booking System" {
+  usecase "View room availability" as UC1
+  usecase "Book room" as UC2
+  usecase "Cancel own booking" as UC3
+  usecase "Block room" as UC4
+  usecase "Unblock room" as UC5
+  usecase "Review room usage" as UC6
+}
+
+Student --> UC1
+Student --> UC2
+Student --> UC3
+
+Administrator --> UC4
+Administrator --> UC5
+Administrator --> UC6
+
+note right of UC2
+  US-02. Rules checked: R1, R3, R2.
+  On success the system issues a
+  confirmation (R4, US-04). The
+  confirmation is a result of booking,
+  not a goal.
+end note
+
+note right of UC3
+  US-03. Only the student's own
+  ACTIVE booking can be cancelled.
+end note
+
+note right of UC4
+  US-05 (R3). Existing bookings
+  of the room stay ACTIVE (A2).
+end note
+
+note right of UC6
+  US-06. Booked hours per room;
+  CANCELLED bookings not counted.
+end note
+@enduml
