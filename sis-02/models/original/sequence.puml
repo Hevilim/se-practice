@@ -1,0 +1,59 @@
+@startuml
+title Course Registration – Browse and Register (US-01..US-03)
+
+actor "Student\n(Alex, signed in)" as S
+boundary "Catalog / Registration UI" as UI
+control "RegistrationService" as RS
+database "Enrollment Store" as DB
+
+== Catalog browsing (R1, AC-01, AC-02) ==
+S -> UI : open course catalog
+UI -> RS : getCatalog(currentSemester)
+RS -> DB : read offerings + enrollment counts\nfor current semester
+DB --> RS : offerings (code, title, offering, capacity, count)
+RS --> UI : rows with availablePlaces = capacity - count
+UI --> S : show CS-101, "Introduction to Programming",\nCS-101-A, 18 available places
+note right of UI
+  A catalog view does NOT reserve a place (AC-02).
+  The shown number may be stale by the
+  time the student sends a request.
+end note
+
+== Registration request (R2–R5) ==
+S -> UI : request registration for CS-101-A
+UI -> RS : register(student, CS-101-A)
+
+critical Atomic operation: final checks + enrollment creation (R2, R3, R4)
+  RS -> DB : check: enrollment exists for (student, CS-101-A)?
+  DB --> RS : result
+  RS -> DB : recheck current count vs capacity
+  DB --> RS : count, capacity
+
+  alt already enrolled (R3, AC-06)
+    note over RS, DB : no Enrollment created,\ncount unchanged (e.g. stays 13)
+  else count >= capacity : course full (R2, AC-05)
+    note over RS, DB : no Enrollment created,\ncount unchanged (e.g. stays 30)
+  else not enrolled and count < capacity : guarded success (R4, AC-03)
+    RS -> DB : create exactly one Enrollment(student, CS-101-A)
+    DB --> RS : created; count 12 -> 13
+  end
+end
+
+alt success
+  RS --> UI : confirmation (17 places left)
+  UI --> S : "You are enrolled in CS-101-A"
+else already enrolled
+  RS --> UI : rejected("already enrolled")
+  UI --> S : "already enrolled"
+else course full
+  RS --> UI : rejected("course full")
+  UI --> S : "course full"
+end
+
+note over S, DB
+  AC-04: if Alex and Bea compete for the last place (29/30),
+  their atomic operations run one after the other. The first
+  succeeds (30/30); the second then sees count = capacity
+  and gets "course full". The count never exceeds 30.
+end note
+@enduml
