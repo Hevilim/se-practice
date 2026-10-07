@@ -103,21 +103,25 @@ row saying which lines of the plan you checked against which AC.
 
 ## 3. Task 2 — the first version (v1), read before it was run
 
-v1 is saved as `code/original/booking_v1.<ext>`, exactly as the assistant returned it: yes / no
+v1 is saved as `code/original/booking_v1.<ext>`, exactly as the assistant returned it: yes
 
 **AC map.** One row per condition in v1. Quote the line.
 
 | # | Line in v1 | AC it implements | Correct as written? If not, why |
 | --- | --- | --- | --- |
-| 1 | | | |
-| 2 | | | |
-| 3 | | | |
-| 4 | | | |
+| 1 | if not (0 <= start < end <= 1440): return False | AC1 | Yes. It stops a negative start, zero length, reversed times and an end after 1440. An end at 1440 is allowed. |
+| 2 | if start <= now: return False | AC1 | Yes. The start must be after now, so a start equal to now gives False. |
+| 3 | if end - start > 120: return False | AC2 | Yes. 120 minutes is allowed, 121 is not. |
+| 4 | if blocked: return False | AC3 | Yes. |
+| 5 | if start < booked_end and booked_start < end: return False (inside a loop) | AC4 | Yes. Both signs are strict, so touching bookings are allowed. The loop checks every booking. |
+| 6 | return True | AC5 | Yes. It runs only when all checks pass. The result is a real Boolean and the list is only read. |
+
+Before running it I expected nothing in AC1 to AC5 to fail. I only expected a crash with TypeError on line 1 when start is "600" or None. I want False there, see 9.2.
 
 **Anything in v1 that no AC asks for** (extra validation, a buffer between bookings, logging,
 saving the booking, a different return type):
 
--
+- Nothing. Only a docstring and comments.
 
 ---
 
