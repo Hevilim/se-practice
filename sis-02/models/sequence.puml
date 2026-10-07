@@ -1,3 +1,56 @@
-' SIS #02 — your FINAL sequence diagram goes here, as PlantUML (@startuml … @enduml).
-' Start from the AI's original in models/original/sequence.puml, apply your accepted review
-' decisions, then render it to models/img/sequence.png (or .svg). README section 5.
+@startuml
+title Course Registration – Browse and Register (US-01..US-03)
+
+actor Student
+boundary RegistrationUI
+control RegistrationService
+database EnrollmentStore
+
+== Catalog browsing (R1, AC-01, AC-02) ==
+Student -> RegistrationUI : open course catalog
+RegistrationUI -> RegistrationService : getCatalog(currentSemester)
+RegistrationService -> EnrollmentStore : read offerings + enrollment counts\nfor current semester
+EnrollmentStore --> RegistrationService : offerings (code, title, offering, capacity, count)
+RegistrationService --> RegistrationUI : rows with availablePlaces = capacity - count
+RegistrationUI --> Student : show code, title, offering,\navailablePlaces (capacity - count)
+note right of RegistrationUI
+  A catalog view does NOT reserve a place (AC-02).
+  The shown number may be stale by the
+  time the student sends a request.
+end note
+
+== Registration request (R2–R5) ==
+Student -> RegistrationUI : request registration for offering
+RegistrationUI -> RegistrationService : register(student, offering)
+
+critical Atomic operation: final checks + enrollment creation (R2, R3, R4)
+  RegistrationService -> EnrollmentStore : existsEnrollment(student, offering)
+  EnrollmentStore --> RegistrationService : enrolled : Boolean
+  RegistrationService -> EnrollmentStore : countEnrollments(offering)
+  EnrollmentStore --> RegistrationService : count : Integer, capacity : Integer
+
+  alt already enrolled (R3, R5, AC-06)
+    note over RegistrationService, EnrollmentStore : no new record,\ncount unchanged
+    RegistrationService --> RegistrationUI : rejected("already enrolled")
+    RegistrationUI --> Student : "already enrolled"
+  else course full and not enrolled (R2, R5, AC-05)
+    note over RegistrationService, EnrollmentStore : no new record,\ncount unchanged
+    RegistrationService --> RegistrationUI : rejected("course full")
+    RegistrationUI --> Student : "course full"
+  else not enrolled and places left (R2, R4, AC-03)
+    RegistrationService -> EnrollmentStore : createEnrollment(student, offering)
+    EnrollmentStore --> RegistrationService : Enrollment created; count + 1
+    RegistrationService --> RegistrationUI : confirm registration\n(capacity - (count + 1) places left)
+    RegistrationUI --> Student : confirm registration
+  end
+end
+
+note over Student, EnrollmentStore
+  AC-04: if Alex and Bea compete for the last place (29/30),
+  their atomic operations run one after the other. The first
+  succeeds (30/30); the second then sees count = capacity
+  and gets "course full". The count never exceeds 30.
+  Reply messages inside the alt change no state; the atomic
+  region only checks and creates.
+end note
+@enduml
