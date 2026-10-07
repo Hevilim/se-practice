@@ -37,7 +37,19 @@
 <!-- 350–400 words. Your answer to the question, the trade-offs, and how it applies to your
      scenario. Explain at least two engineering decisions and why they fit the scenario. -->
 
-(write here)
+Sommerville says software is computer programs and associated documentation (slide 7). So when we give Smart Campus to the university, the code is only one part. The IT staff, not our team, will run and change the system later, and slide 13 says most costs come after a system is in use. So the customer needs things that let other people install, use and change the system.
+
+First, installation. The IT staff need a step by step installation guide and the configuration data: the room list, the 120 minute limit and the administrator account. Without it nobody can book a room.
+
+Second, use. Students need a one page guide to find, book and cancel a room, and the admin needs a guide to block rooms and check room use. Slide 11 says good software must be acceptable, which means understandable and usable, so the guides are part of the product. I assume login is the university single sign-on, so we do not store passwords, but this must be confirmed.
+
+Third, acceptance. We hand over the requirements list and the acceptance test cases, so the university can check every requirement before it starts to use the system.
+
+Fourth, maintenance. Slide 11 also says software must be maintainable. IT needs the source code in a repository, a README that explains how to run the system and the tests, database documentation, backup and restore steps and a list of known limitations.
+
+Engineering decision 1: write the booking rule down and test it. The rule is that bookings for the same room must not overlap, but one can start when another ends. Our risk is that someone changes the rules and two students get the same room. Our tests run one request at a time, so the team adds one test where two requests for the same room and time come at the same time, and only one may pass. A database rule against overlaps is a possible extra protection, but it depends on how bookings are stored.
+
+Engineering decision 2: two students in four weeks can not make everything perfect. We put most time into things IT can not easily make later: the installation guide, the configuration data, the README with test instructions, the written booking rule and the backup steps. User guides stay one page, and the handover is one demonstration. The trade-off is that features get less time.
 
 ## 3. Review
 
@@ -45,20 +57,30 @@
      checks and your two substantive revisions, each with a reason. Point at the rows of the
      tables in section 9 ("verification row 2", "change-log row 1"). -->
 
-(write here)
+Prompt B gave 13 points. I accepted points 1, 2, 3, 5, 6, 9, 10 and 12. For example, the draft said "code alone supports none of these tasks", which is too strong. It also said students need passwords, but my scenario does not say how users log in, so I made single sign-on an assumption. I qualified points 4, 7 and 8: the single admin is a decision for the university, a database rule is only one option, and automatic test runs only help if IT owns them. For point 11 I accepted backup and known limitations, but rejected licence and versions because of the word limit. For point 13 I rejected the word count note, because it is not about content.
+
+I challenged one AI claim. Prompt A said Sommerville 1.1 says software is programs, documentation and configuration data. The slide only says programs and associated documentation (verification row 1), so I qualified it. I still need configuration data, but as a need of my scenario, not as a textbook quote. The second check, slide 11, confirmed the attributes of good software, so I kept it (verification row 2). I opened the slides myself, and Claude also read them. I did not open the book itself.
+
+Then I changed the revised draft. Change-log row 1: the AI listed opening hours, but my rules have no opening hours, so I wrote the 120 minute limit. Change-log row 2: the AI only said that two requests at the same time are not tested. Double booking is my main risk, so I added a test for it. Change-log row 3: I used slide 11 for maintainability and acceptability, not only for security.
 
 ## 4. Conclusion
 
 <!-- 100–150 words. Your recommendation for the scenario and its main limitation. -->
 
-(write here)
+My recommendation is that the team hands over the code together with the configuration data, an installation guide, a README with test instructions, short user and admin guides, the requirements and acceptance test cases, maintenance documents with backup steps, and one handover demonstration. The most important extra work is to write the booking rule down and add a test for two requests at the same time, because double booking is the main risk after the team leaves.
+
+The main limitation is that my evidence comes only from the Chapter 1 slides, not from the book, and that some points are assumptions: the login method, the database and the repository. With two students and four weeks the documents will also be short, so the IT staff may still have questions that no document answers.
 
 ## 5. Reflection
 
 <!-- 150–200 words. NOT part of the main total. Written by you, not by the assistant:
      what helped, what you changed, what you learned. Specific beats flattering. -->
 
-(write here)
+Before this lecture I thought that software is just a program, some code that run on computer. But in the first slide I learned that software is not only programs, it is also documentation. This was a little surprise for me, because I usually don't write documentation for my projects. Now I understand that without documentation other people can't understand or change the program easy.
+
+Also I learned the four attributes of good software: maintainability, dependability and security, efficiency and acceptability. For me the most important one is maintainability. I do some small projects for clients, and almost every time client come back and ask to change something. When my code was messy, it took a lot of time to fix it. So I agree with the idea that software must can evolve, because the business always changing.
+
+The last slide said that most of the cost is not writing the program, but changing it after people start using it. At first I didn't believe it, but then I remember my own experience and it is true. Fixing and adding features take more time than first version.
 
 ## 6. References
 
