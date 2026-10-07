@@ -1,0 +1,49 @@
+# SIS #01 — the declaration. FACTS ONLY: every explanation stays in report.md.
+#
+# Fill this in LAST, after your final run of the checker, then validate it:
+#     python tests/check_report.py
+#     python tests/validate_submission.py
+#
+# Your checker numbers are re-run by the instructor at the commit you name below.
+# Numbers that do not match what your repository produces cost the whole workflow
+# criterion. A FAIL you report honestly — here and under known_fails — costs nothing extra.
+#
+# Format rules: two spaces for indentation, never tabs. Leave the keys exactly as they are.
+
+schema: 1
+assignment: "sis-01"            # do not edit
+
+student:
+  name: Karim Aliyev  # as in the university register
+  student_id: 24B031620  # e.g. 24B031016
+  group: CSCI-2208  # your group code, as in the timetable
+  github: Hevilim  # username only, not a URL
+
+topic: "1.1"  # one of 1.1 … 1.10 — the same as the **Topic:** line in report.md
+
+assistant:
+  tool: Claude (claude.ai)  # e.g. ChatGPT (web), Claude.ai, Gemini app, DeepSeek chat
+  model: Claude Opus 5.5  # the exact model with its version, as the tool shows it;
+                                # if the tool does not show it, write: not displayed
+
+checker:                        # from your LAST run of python tests/check_report.py
+  pass: 24
+  fail: 0
+  error: 0
+  commit: 595e241  # git rev-parse --short HEAD, run right after that checker run
+
+counts:                         # copy from the checker's output; the validator re-measures them
+  main_words: 949  # "main report (sections 1-4): N words"
+  reflection_words: 187  # "reflection: N words"
+  exchanges: 3  # how many B-sections are in Appendix B (3 or more)
+  verified_claims: 2  # complete rows in the verification table
+  revisions: 3  # substantive rows in the change log
+
+decisions:                      # how many verification rows you marked each way
+  keep: 1
+  qualify: 1
+  reject: 0
+
+known_fails: []                 # the ID of every check that is still FAIL or ERROR in your last
+                                # run, e.g. [W2, E7] — and explain each one in report.md, section 3.
+                                # [] when the checker is clean.
