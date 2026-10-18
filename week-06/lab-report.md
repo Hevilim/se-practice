@@ -16,8 +16,8 @@ grader find your answers by them. Add rows to any table; never remove its header
 | Tool | Bolt.new |
 | Exact model (as Bolt shows it, or `not displayed`) | |
 | Bolt project link (or `not shared`, and why) | |
-| Browser and version | |
-| If you could not use Bolt.new: the tool you used instead, and why | |
+| Browser and version | Claude in-app browser (Chromium 152.0.7977.149) on macOS |
+| If you could not use Bolt.new: the tool you used instead, and why | n/a - used Bolt.new |
 
 ---
 
@@ -28,14 +28,14 @@ Fill the first three columns now; fill the last one after Task 3.
 
 | # | What I expect to go wrong | AC it concerns | Was I right? (after Task 3) |
 | --- | --- | --- | --- |
-| 1 | | | |
-| 2 | | | |
+| 1 | Bolt will not add a field to supply the current time. It will use the real device clock as "now", so I cannot set now = 09:00 and case T6 (starts now) cannot be tested as written. | AC1 | |
+| 2 | Bolt will not give a way to block the selected room (no blocked room in the sample data and no toggle), so case T3 (blocked room) cannot be set up. | AC3 | |
 
 **The initial prompt exactly as I sent it** — the deck's prompt with AC1–AC6 pasted in place of
 `[paste AC1–AC6]`, nothing else changed:
 
 ```text
-(paste here)
+Build a small responsive Smart Campus Room Availability Checker. Requirements: AC1: Accept a candidate interval only when 0 ≤ start < end ≤ 1440 and start is after the supplied current time. AC2: Reject a booking longer than 120 minutes. AC3: Reject the request when the selected room is blocked. AC4: Reject any interval that overlaps an existing booking; touching endpoints are allowed. AC5: Show a clear Available / Unavailable decision without changing the existing booking data. AC6: The page remains usable at desktop and narrow/mobile width and gives understandable validation feedback. Use fictional sample data only. Keep the implementation simple and within one-page scope. Do not add authentication, backend services, analytics, or unrelated features. After building, briefly list the main files/components you created.
 ```
 
 ---
