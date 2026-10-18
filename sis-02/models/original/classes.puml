@@ -1,0 +1,48 @@
+@startuml
+title Course Registration – Domain Model
+
+hide methods
+
+class Student {
+  studentId : String
+  name : String
+}
+
+class Course {
+  code : String
+  title : String
+}
+
+class Semester {
+  name : String
+}
+
+class CourseOffering {
+  offeringId : String
+  capacity : Integer {capacity > 0}
+  /enrollmentCount : Integer
+  /availablePlaces : Integer
+}
+
+class Enrollment {
+  enrollmentId : String
+}
+
+Course "1" -- "0..*" CourseOffering : is scheduled as >
+Semester "1" -- "0..*" CourseOffering : contains >
+Student "1" -- "0..*" Enrollment : holds >
+CourseOffering "1" -- "0..*" Enrollment : has >
+
+note right of CourseOffering
+  Capacity constraint (R2):
+  {enrollmentCount <= capacity}
+  /enrollmentCount = number of linked Enrollments
+  /availablePlaces = capacity - enrollmentCount
+end note
+
+note bottom of Enrollment
+  Uniqueness constraint (R3):
+  {unique (Student, CourseOffering)}
+  at most one Enrollment per student per offering
+end note
+@enduml
