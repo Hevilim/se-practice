@@ -28,8 +28,8 @@ Fill the first three columns now; fill the last one after Task 3.
 
 | # | What I expect to go wrong | AC it concerns | Was I right? (after Task 3) |
 | --- | --- | --- | --- |
-| 1 | Bolt will not add a field to supply the current time. It will use the real device clock as "now", so I cannot set now = 09:00 and case T6 (starts now) cannot be tested as written. | AC1 | |
-| 2 | Bolt will not give a way to block the selected room (no blocked room in the sample data and no toggle), so case T3 (blocked room) cannot be set up. | AC3 | |
+| 1 | Bolt will not add a field to supply the current time. It will use the real device clock as "now", so I cannot set now = 09:00 and case T6 (starts now) cannot be tested as written. | AC1 | No. v1 has a Current time field and it starts at 09:00, so I can supply now. |
+| 2 | Bolt will not give a way to block the selected room (no blocked room in the sample data and no toggle), so case T3 (blocked room) cannot be set up. | AC3 | Partly. There is one blocked room (Innovation Lab), but it has its own booking 08:00-20:00 and I cannot block the room with the 10:00-11:00 booking, so T3 cannot be set up. |
 
 **The initial prompt exactly as I sent it** — the deck's prompt with AC1–AC6 pasted in place of
 `[paste AC1–AC6]`, nothing else changed:
@@ -43,17 +43,49 @@ Build a small responsive Smart Campus Room Availability Checker. Requirements: A
 ## 3. Task 2 — prototype v1
 
 v1 export saved in `original/` and screenshot saved as `evidence/v1.png` **before** any cleanup
-prompt: yes / no
+prompt: yes
 
 **Bolt's list of the files/components it created, pasted unedited:**
 
 ```text
-(paste here)
+0123456789
+files read
+
+I'll build this as a single-page React app with in-memory sample data (no backend, per your constraints). Writing the main component now.
+0123456789
+actions taken
+
+Build passes. The app is done.
+
+I built a Smart Campus Room Availability Checker on a single page. You pick a room, set the current time and a requested start/end slot, and press Check availability to get a clear Available / Unavailable / Invalid decision.
+
+All six acceptance criteria are handled:
+
+    Valid interval check (0 ≤ start < end ≤ 1440, start after current time)
+    Rejects bookings longer than 120 minutes
+    Rejects when the room is blocked
+    Rejects overlapping bookings (touching endpoints allowed)
+    Shows the decision without changing any existing booking data
+    Responsive layout with plain-language validation feedback
+
+Main files/components created:
+
+    src/App.tsx — the whole page: form, evaluateBooking logic (the AC1–AC4 rules), ResultCard (Available/Unavailable/Invalid panel), RoomSchedule (room info + existing bookings list), and Timeline (a 24-hour visual bar). Fictional sample rooms live in-memory in this same file.
+
+No backend, auth, or persistence was added, per your request — sample data only.
 ```
 
 **What v1 does — one line per thing that works, or visibly does not:**
 
--
+- The page has a Room list with four fictional rooms. One of them, Innovation Lab, is blocked.
+- The page has a Current time field. It starts at 09:00, so I can supply the current time.
+- Start and End are time fields in HH:MM. They stop at 23:59, so I cannot ask for 24:00.
+- The Check availability button shows Available, Unavailable or Invalid input, with reasons.
+- No room has only one booking 10:00-11:00, so I cannot build the base setup of the nine cases.
+- The blocked room has its own booking 08:00-20:00, and there is no way to block another room.
+- When the start is not after now or the end is before the start, the page says Invalid input, not Unavailable.
+- A check does not change the list of existing bookings. Nothing is saved.
+- package.json has the dependency @supabase/supabase-js, but the code never uses it.
 
 **Repair prompt** (only if the first build did not run — the deck allows one, then the result is
 v1). Leave empty if you did not need it:
@@ -72,15 +104,15 @@ no way to set up the case). Save each final run as `evidence/final-T<n>.png`.
 
 | # | Case | What you set up and request | Expected | AC | Result on v1 | Result on final | Final screenshot |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| T1 | Touching | 11:00–12:00 | Available | AC4 | Available / Unavailable / Not testable | Available / Unavailable / Not testable | final-T1.png |
-| T2 | Overlap | 10:30–11:30 | Unavailable | AC4 | Available / Unavailable / Not testable | Available / Unavailable / Not testable | final-T2.png |
-| T3 | Blocked | 11:00–12:00, room blocked | Unavailable | AC3 | Available / Unavailable / Not testable | Available / Unavailable / Not testable | final-T3.png |
-| T4 | Exactly 2 hours | 12:00–14:00 | Available | AC2 | Available / Unavailable / Not testable | Available / Unavailable / Not testable | final-T4.png |
-| T5 | Over 2 hours | 12:00–14:01 | Unavailable | AC2 | Available / Unavailable / Not testable | Available / Unavailable / Not testable | final-T5.png |
-| T6 | Starts now | 09:00–09:30 (current time 09:00) | Unavailable | AC1 | Available / Unavailable / Not testable | Available / Unavailable / Not testable | final-T6.png |
-| T7 | Reversed times | 12:00–11:00, and the page says why | Unavailable | AC1, AC6 | Available / Unavailable / Not testable | Available / Unavailable / Not testable | final-T7.png |
-| T8 | Same check twice | T1, then T1 again without reloading | Available | AC5 | Available / Unavailable / Not testable | Available / Unavailable / Not testable | final-T8.png |
-| T9 | Narrow screen | T1 at about 375 px wide | Available | AC6 | Available / Unavailable / Not testable | Available / Unavailable / Not testable | final-T9.png |
+| T1 | Touching | 11:00–12:00 | Available | AC4 | Not testable | Available / Unavailable / Not testable | final-T1.png |
+| T2 | Overlap | 10:30–11:30 | Unavailable | AC4 | Not testable | Available / Unavailable / Not testable | final-T2.png |
+| T3 | Blocked | 11:00–12:00, room blocked | Unavailable | AC3 | Not testable | Available / Unavailable / Not testable | final-T3.png |
+| T4 | Exactly 2 hours | 12:00–14:00 | Available | AC2 | Not testable | Available / Unavailable / Not testable | final-T4.png |
+| T5 | Over 2 hours | 12:00–14:01 | Unavailable | AC2 | Not testable | Available / Unavailable / Not testable | final-T5.png |
+| T6 | Starts now | 09:00–09:30 (current time 09:00) | Unavailable | AC1 | Not testable | Available / Unavailable / Not testable | final-T6.png |
+| T7 | Reversed times | 12:00–11:00, and the page says why | Unavailable | AC1, AC6 | Not testable | Available / Unavailable / Not testable | final-T7.png |
+| T8 | Same check twice | T1, then T1 again without reloading | Available | AC5 | Not testable | Available / Unavailable / Not testable | final-T8.png |
+| T9 | Narrow screen | T1 at about 375 px wide | Available | AC6 | Not testable | Available / Unavailable / Not testable | final-T9.png |
 
 ---
 
@@ -93,8 +125,10 @@ log a justified cleanup that preserves behaviour. Save a screenshot of each as
 
 | # | Issue | Evidence: steps → expected → observed | Priority | Decision |
 | --- | --- | --- | --- | --- |
-| 1 | | | High / Medium / Low | Fix / Reject / Defer |
-| 2 | | | High / Medium / Low | Fix / Reject / Defer |
+| 1 | No room has only the booking 10:00-11:00, so the base of the nine cases cannot be set up (T1, T2, T4-T9). | Open the Room list and look at each room. Expected: an open room whose only booking is 10:00-11:00, so I can check 11:00-12:00 next to it (AC4). Observed: Engineering Hall A has 09:00-10:00, 13:00-14:00 and 18:00-19:00, Library Study Room 3 has 11:00-12:00 and 17:00-18:00, Auditorium B has 10:00-12:00. | High | Fix |
+| 2 | I cannot block the room with the 10:00-11:00 booking, so T3 cannot be set up. | Look for a way to block a room. Expected: I can check 11:00-12:00 in the blocked room and get Unavailable (AC3). Observed: only Innovation Lab is blocked, it has its own booking 08:00-20:00, and there is no control to block a room. | High | Fix |
+| 3 | When AC1 fails, the decision says Invalid input, not Unavailable (T6, T7). | Engineering Hall A, current time 09:00, request 12:00-11:00. Expected: a clear Unavailable decision with the reason (AC5, AC6). Observed: the title is Invalid input and the reason says the end must be after the start. | Medium | Fix |
+| 4 | package.json has @supabase/supabase-js, a database library that the page never uses. | Open original/project/package.json and search src for supabase. Expected: no backend or database code (scope). Observed: the dependency is in package.json, line 14, and no file in src imports it. | Low | Fix |
 
 ---
 
