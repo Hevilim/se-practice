@@ -1,0 +1,62 @@
+# SIS #03 — the declaration. FACTS ONLY: every explanation stays in report.md.
+#
+# Fill this in LAST, after your final run of the checker, then validate it:
+#     python tests/check_sis.py
+#     python tests/validate_submission.py
+#
+# Your checker numbers are re-run by the instructor at the head of your pull request.
+# Numbers that do not match what that commit produces cost the whole workflow criterion.
+# A FAIL you report honestly — here and under known_fails — costs nothing extra.
+#
+# Format rules: two spaces for indentation, never tabs. Leave the keys exactly as they are.
+
+schema: 1
+assignment: "sis-03"            # do not edit
+
+student:
+  name: Karim Aliyev  # as in the university register
+  student_id: 24B031620  # e.g. 00X000000
+  group: CSCI-2208  # your group code, as in the timetable
+  github: Hevilim  # username only, not a URL
+
+assistant:
+  tool: Claude  # the coding assistant for the Python part, e.g. ChatGPT (web), Claude.ai
+  model: Claude Opus 5.5  # exactly as in report.md section 1, "Coding assistant model"
+
+bolt:
+  model: not displayed  # the model Bolt shows, or: not displayed
+  project_url: https://bolt.new/p/72159062  # the share link of your Bolt project, or: not-shared
+
+language:
+  name: python  # python | javascript | typescript | java | csharp | go | cpp | <other>
+  path: A  # A (Python, the checker runs your code) | B (any other language)
+
+reuse:                          # exactly as in report.md section 1
+  python_v1: week-05  # week-05 | fresh
+  web_v1: week-06  # week-06 | fresh
+
+checker:                        # from your LAST run of python tests/check_sis.py
+  pass: 55
+  fail: 0
+  error: 0
+  commit: 2775024  # git rev-parse --short HEAD, run right after that checker run
+
+counts:                         # the validator re-measures every one
+  tests: 35  # Path A: the N in "Ran N tests". Path B: how many tests your suite runs
+  exchanges: 7  # B-sections in report.md section 11 (4 or more)
+  issues: 3  # complete rows in section 7 (2 or more)
+  critique_decisions: 8  # rows in section 8 marked accept, reject or modify (3 or more)
+  reflection_words: 180  # "section 10: N words" in the checker output
+
+cases:                          # from report.md section 5
+  python_final_matches: 11  # of T1-T11, how many Python final results equal the Expected column (0-11)
+  page_final_matches: 10  # of T1-T12, how many Page final results equal the Expected column (0-12)
+
+known_fails: []                 # the ID of every check still FAIL or ERROR in your last run,
+                                # e.g. [C4, X4] — each explained in report.md section 13. [] when clean.
+
+honesty:
+  v1_unedited: yes  # yes | no   code/original/ and web/original/ hold the AI's first versions, untouched
+  screenshots_unedited: yes  # yes | no   every image in evidence/ is an unedited capture
+  results_observed: yes  # yes | no   every result in section 5 was actually run or seen, not assumed
+  ai_usage_disclosed: yes  # yes | no   AI_USAGE.md is complete
