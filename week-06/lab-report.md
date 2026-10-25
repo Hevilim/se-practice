@@ -14,8 +14,8 @@ grader find your answers by them. Add rows to any table; never remove its header
 | | |
 | --- | --- |
 | Tool | Bolt.new |
-| Exact model (as Bolt shows it, or `not displayed`) | |
-| Bolt project link (or `not shared`, and why) | |
+| Exact model (as Bolt shows it, or `not displayed`) | not displayed |
+| Bolt project link (or `not shared`, and why) | https://bolt.new/p/72159062 |
 | Browser and version | Claude in-app browser (Chromium 152.0.7977.149) on macOS |
 | If you could not use Bolt.new: the tool you used instead, and why | n/a - used Bolt.new |
 
@@ -104,15 +104,15 @@ no way to set up the case). Save each final run as `evidence/final-T<n>.png`.
 
 | # | Case | What you set up and request | Expected | AC | Result on v1 | Result on final | Final screenshot |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| T1 | Touching | 11:00–12:00 | Available | AC4 | Not testable | Available / Unavailable / Not testable | final-T1.png |
-| T2 | Overlap | 10:30–11:30 | Unavailable | AC4 | Not testable | Available / Unavailable / Not testable | final-T2.png |
-| T3 | Blocked | 11:00–12:00, room blocked | Unavailable | AC3 | Not testable | Available / Unavailable / Not testable | final-T3.png |
-| T4 | Exactly 2 hours | 12:00–14:00 | Available | AC2 | Not testable | Available / Unavailable / Not testable | final-T4.png |
-| T5 | Over 2 hours | 12:00–14:01 | Unavailable | AC2 | Not testable | Available / Unavailable / Not testable | final-T5.png |
-| T6 | Starts now | 09:00–09:30 (current time 09:00) | Unavailable | AC1 | Not testable | Available / Unavailable / Not testable | final-T6.png |
-| T7 | Reversed times | 12:00–11:00, and the page says why | Unavailable | AC1, AC6 | Not testable | Available / Unavailable / Not testable | final-T7.png |
-| T8 | Same check twice | T1, then T1 again without reloading | Available | AC5 | Not testable | Available / Unavailable / Not testable | final-T8.png |
-| T9 | Narrow screen | T1 at about 375 px wide | Available | AC6 | Not testable | Available / Unavailable / Not testable | final-T9.png |
+| T1 | Touching | 11:00–12:00 | Available | AC4 | Not testable | Available | final-T1.png |
+| T2 | Overlap | 10:30–11:30 | Unavailable | AC4 | Not testable | Unavailable | final-T2.png |
+| T3 | Blocked | 11:00–12:00, room blocked | Unavailable | AC3 | Not testable | Unavailable | final-T3.png |
+| T4 | Exactly 2 hours | 12:00–14:00 | Available | AC2 | Not testable | Available | final-T4.png |
+| T5 | Over 2 hours | 12:00–14:01 | Unavailable | AC2 | Not testable | Unavailable | final-T5.png |
+| T6 | Starts now | 09:00–09:30 (current time 09:00) | Unavailable | AC1 | Not testable | Unavailable | final-T6.png |
+| T7 | Reversed times | 12:00–11:00, and the page says why | Unavailable | AC1, AC6 | Not testable | Unavailable | final-T7.png |
+| T8 | Same check twice | T1, then T1 again without reloading | Available | AC5 | Not testable | Available | final-T8.png |
+| T9 | Narrow screen | T1 at about 375 px wide | Available | AC6 | Not testable | Available | final-T9.png |
 
 ---
 
@@ -128,7 +128,7 @@ log a justified cleanup that preserves behaviour. Save a screenshot of each as
 | 1 | No room has only the booking 10:00-11:00, so the base of the nine cases cannot be set up (T1, T2, T4-T9). | Open the Room list and look at each room. Expected: an open room whose only booking is 10:00-11:00, so I can check 11:00-12:00 next to it (AC4). Observed: Engineering Hall A has 09:00-10:00, 13:00-14:00 and 18:00-19:00, Library Study Room 3 has 11:00-12:00 and 17:00-18:00, Auditorium B has 10:00-12:00. | High | Fix |
 | 2 | I cannot block the room with the 10:00-11:00 booking, so T3 cannot be set up. | Look for a way to block a room. Expected: I can check 11:00-12:00 in the blocked room and get Unavailable (AC3). Observed: only Innovation Lab is blocked, it has its own booking 08:00-20:00, and there is no control to block a room. | High | Fix |
 | 3 | When AC1 fails, the decision says Invalid input, not Unavailable (T6, T7). | Engineering Hall A, current time 09:00, request 12:00-11:00. Expected: a clear Unavailable decision with the reason (AC5, AC6). Observed: the title is Invalid input and the reason says the end must be after the start. | Medium | Fix |
-| 4 | package.json has @supabase/supabase-js, a database library that the page never uses. | Open original/project/package.json and search src for supabase. Expected: no backend or database code (scope). Observed: the dependency is in package.json, line 14, and no file in src imports it. | Low | Fix |
+| 4 | package.json has @supabase/supabase-js, a database library that the page never uses. | Open original/project/package.json and search src for supabase. Expected: no backend or database code (scope). Observed: the dependency is in package.json, line 14, and no file in src imports it. | Low | Defer |
 
 ---
 
@@ -140,13 +140,70 @@ in) and Bolt's answer, unedited.
 **Functional fix prompt, as sent, and Bolt's answer:**
 
 ```text
-(paste here)
+In the current prototype, opening the Room list to find an open room whose only booking is 10:00–11:00 produces no such room (every sample room has other bookings or different times), but AC4 requires that I can check 11:00–12:00 against an existing 10:00–11:00 booking, with touching endpoints allowed. Make the smallest change that fixes this behavior. Preserve the other acceptance criteria. Explain which file/component you changed and why.
+
+The AC4 logic is already correct (touching endpoints allowed). The issue is sample data: no room has only a 10:00–11:00 booking. Auditorium B has a single booking of 10:00–12:00 — I'll shorten it to 10:00–11:00 so you can check 11:00–12:00 and get Available.
+0123456789
+actions taken
+
+Build passes.
+
+I changed one line in src/App.tsx: Auditorium B's single booking from 10:00–12:00 (600–720) to 10:00–11:00 (600–660).
+
+Why: the overlap logic (start < b.end && end > b.start) already correctly allows touching endpoints — the real problem was purely sample data. No room had a single booking ending at 11:00 that would let you request 11:00–12:00 and get Available. Now Auditorium B has exactly one booking, 10:00–11:00, so checking 11:00–12:00 (with current time before 11:00) returns Available, exercising AC4's touching-endpoints rule. All other acceptance criteria remain untouched.
+```
+
+Functional fix prompt 2, as sent, and Bolt's answer:
+
+```text
+In the current prototype, selecting the room with the 10:00–11:00 booking and requesting 11:00–12:00 while that room is blocked produces no way to set the case up (the only blocked room, Innovation Lab, has its own 08:00–20:00 booking, and there is no control to block a room), but AC3 requires an Unavailable decision when the selected room is blocked. Make the smallest change that fixes this behavior. Preserve the other acceptance criteria. Explain which file/component you changed and why.
+
+The blocked room (Innovation Lab) currently has a single 08:00–20:00 booking, so any daytime request also overlaps it — you can't isolate the AC3 "blocked" reason. I'll shorten that booking to 10:00–11:00 so requesting 11:00–12:00 against it returns Unavailable only because the room is blocked.
+0123456789
+actions taken
+
+Build passes.
+
+I changed one line in src/App.tsx: Innovation Lab's booking from 08:00–20:00 (480–1200) to 10:00–11:00 (600–660).
+
+Why: the AC3 logic (rejecting when room.blocked is true) was already correct, but the sample data made the case impossible to isolate. The blocked room's all-day booking meant any daytime request also triggered AC4 overlap, so you couldn't see a clean "blocked" Unavailable decision. Now selecting Innovation Lab and requesting 11:00–12:00 (touching its booking, with current time before 11:00) returns Unavailable with the single reason "This room is currently blocked and cannot be booked." — exercising AC3 cleanly. All other acceptance criteria are preserved.
+```
+
+Functional fix prompt 3, as sent, and Bolt's answer:
+
+```text
+In the current prototype, setting current time 09:00 and requesting 09:00–09:30, or requesting 12:00–11:00, produces the decision title "Invalid input", but AC5 requires a clear Available / Unavailable decision, with the reason shown (AC6). Make the smallest change that fixes this behavior. Preserve the other acceptance criteria. Explain which file/component you changed and why.
+
+The "Invalid input" branch violates AC5 — invalid intervals should still produce an Unavailable decision with reasons. I'll make all failed checks return unavailable and remove the now-dead "invalid" UI branch.
+0123456789
+actions taken
+
+Build passes.
+
+I changed src/App.tsx in the evaluateBooking function and the ResultCard component.
+
+Why: the old code split failures into "invalid" (bad interval / start ≤ current) and "unavailable" (blocked/overlap/too long), and ResultCard rendered "Invalid input" for the invalid branch. That violated AC5, which requires a clear Available / Unavailable decision — there's no "Invalid" verdict in the spec. Now every failed check returns unavailable with its reason(s) shown (AC6), and ResultCard always shows the Unavailable panel. So 09:00–09:30 with current 09:00 now shows "Unavailable — Start time must be after the current time," and 12:00–11:00 shows "Unavailable — End must be after start." The Available path and all other acceptance criteria are unchanged.
 ```
 
 **Cleanup prompt, as sent, and Bolt's answer:**
 
 ```text
-(paste here)
+Review only package.json dependencies (@supabase/supabase-js is listed but never imported) for unnecessary duplication, confusing naming, or UI feedback problems. Suggest one small cleanup. Do not add features or redesign the whole application. Implement it only if it preserves AC1–AC6.
+
+Searched
+supabase
+Open
+
+Confirmed: @supabase/Bolt Database-js is declared in package.json but never imported anywhere in src/. It's dead weight — the app uses in-memory sample data only (per your original "no backend services" constraint). Removing it is a safe cleanup that doesn't touch any acceptance criteria.
+0123456789
+actions taken
+Edited
+package.json
+Open
+Reinstall and build to verify removal is clean
+Open
+
+Response interrupted.
 ```
 
 Add further blocks for further prompts.
@@ -156,8 +213,10 @@ the AC (or the scope) that justifies it.
 
 | # | What Bolt changed or suggested | accept / reject | Reason — cite the AC or the scope | Retest: which cases, result |
 | --- | --- | --- | --- | --- |
-| 1 | | accept / reject | | |
-| 2 | | accept / reject | | |
+| 1 | Changed the only booking of Auditorium B from 10:00-12:00 to 10:00-11:00 in src/App.tsx. | accept | It changes only the sample data. Now the base of the nine cases can be set up and AC4 can be tested. The check logic is the same. | T1 in Auditorium B: Available. Then all nine: T1, T2, T4, T5, T8 and T9 as expected. T3 Unavailable, but also with an overlap reason. T6 and T7 Invalid input. |
+| 2 | Changed the booking of the blocked room Innovation Lab from 08:00-20:00 to 10:00-11:00 in src/App.tsx. | accept | It changes only the sample data. Now T3 can be set up and the only reason is the blocked room (AC3). | T3 in Innovation Lab: Unavailable, the only reason is the blocked room. Then all nine: T1-T5, T8 and T9 as expected. T6 and T7 still Invalid input. |
+| 3 | Removed the Invalid input decision in evaluateBooking and ResultCard. Every failed check now shows Unavailable with its reasons. | accept | AC5 asks for a clear Available or Unavailable decision. The reasons are still shown, so AC6 is kept. | T6 and T7: Unavailable with the reason. Then all nine: 9 of 9 as expected. |
+| 4 | Said it removed @supabase/supabase-js from package.json. | reject | The answer was interrupted and the download still has the dependency, so the change was not applied. It does not change AC1-AC6, so I defer it. | Opened the downloaded package.json: line 14 still has the dependency. All nine on the download: 9 of 9 as expected. |
 
 ---
 
@@ -167,8 +226,9 @@ Two to four concrete changes, each one retested.
 
 | # | Issue | Decision | Change (file or component) | Result after retest |
 | --- | --- | --- | --- | --- |
-| 1 | | | | |
-| 2 | | | | |
+| 1 | No room has only the booking 10:00-11:00 | Fix | src/App.tsx, sample data of Auditorium B | T1 Available. T1, T2, T4, T5, T8 and T9 now testable and as expected. |
+| 2 | I cannot block the room with the 10:00-11:00 booking | Fix | src/App.tsx, sample data of Innovation Lab | T3 Unavailable, only because the room is blocked. No other case changed. |
+| 3 | Invalid input instead of Unavailable | Fix | src/App.tsx, evaluateBooking and ResultCard | T6 and T7 Unavailable with the reason. All nine as expected. |
 
 ---
 
@@ -178,9 +238,11 @@ Pick one file or component Bolt generated that matters for AC1–AC5 — the one
 availability is the best choice. Name its path in backticks, then explain in your own words, without
 the assistant, what it does and how it decides. 60 words or more.
 
-**File:** `(write here, e.g. src/App.tsx)`
+**File:** `src/App.tsx`
 
 <!-- Write your explanation below this line -->
+
+The part that decides is the function evaluateBooking in this file. It gets the selected room, the start, the end and the current time. All times are in minutes after midnight. Before this, the function toMinutes changes the HH:MM text from the fields into minutes. If there is no room or a time is empty, evaluateBooking returns Unavailable at once. Then it checks the rules one by one and adds every broken rule to a list of reasons. For AC1, the start must be 0 or more, the end must be 1440 or less, the start must be before the end, and the start must be after the current time. For AC2, the end minus the start must be 120 or less. For AC3, the room must not be blocked. For AC4, no booking may overlap. A booking overlaps when the start is before its end and the end is after its start, so 11:00-12:00 next to 10:00-11:00 is fine. If the list is empty, the answer is Available. If not, the answer is Unavailable with all the reasons. The function only reads the room data and never changes it, so AC5 is kept.
 
 ---
 
@@ -192,7 +254,7 @@ The same IDs as `known_fails` in `submission.yml`. Write `none` if the run is cl
 
 | Check | Why it stays |
 | --- | --- |
-| | |
+| P3 | package.json in prototype/ still has @supabase/supabase-js. Bolt said it removed it, but the answer was interrupted and the download still has it (issue 4). No file in src imports it, the page makes no network calls and saves nothing, so AC1-AC6 are not affected. I decided to defer it. |
 
 ### 9.2 The end of the day
 
@@ -200,14 +262,14 @@ AC1 allows `end ≤ 1440` — a booking may end at 24:00. Can a user of your fin
 23:00–24:00? How — and if not, why is that acceptable or not? (This is the value you declare in
 `submission.yml` under `assumptions.end_of_day`.)
 
--
+- No. The Start and End fields are time inputs and stop at 23:59. The function toMinutes in src/App.tsx also does not accept 24:00. So the latest request is 23:00-23:59. I think this is acceptable for this prototype, because only the last minute of the day is lost and all nine cases still work. But the page does not fully cover AC1, so I declare not-expressible.
 
 ### 9.3 Which "now"?
 
 AC1 says "after the supplied current time". What did **v1** use as the current time, and what did
 that mean for testing case T6?
 
--
+- v1 used the Current time field on the page, and it starts at 09:00. So the current time was supplied, not taken from the clock. The page only uses the clock to show the date. T6 was still Not testable on v1, because no room had only the booking 10:00-11:00. When I tried 09:00-09:30 in another room, v1 said Invalid input, not Unavailable. On the final page T6 gives Unavailable with the reason that the start must be after the current time.
 
 ---
 
@@ -224,3 +286,5 @@ that mean for testing case T6?
      booking data." -->
 
 <!-- Write your conclusion below this line -->
+
+My first prediction was wrong. v1 had a Current time field that started at 09:00, so I could supply the current time. My second prediction was partly right. There was a blocked room, but its booking 08:00-20:00 hid the blocked reason. The real problem of v1 was the sample data. No room had only the booking 10:00-11:00, so all nine cases were Not testable. v1 also said Invalid input instead of Unavailable when the times were wrong. I rejected the supabase cleanup. Bolt said that it edited package.json, but the answer was interrupted and the download still had the dependency. I cannot accept a change that did not happen. v1 looked finished. It had a timeline, colors and clear cards. But it did not meet AC1-AC6. For example, 12:00-11:00 (T7) on v1 showed Invalid input, and AC5 asks for Available or Unavailable. On the final page T7 shows Unavailable and the reason that the end must be after the start.
