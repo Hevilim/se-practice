@@ -164,3 +164,28 @@ describe('canBook - AC5: decision without changing booking data', () => {
     expect(input.bookings).toEqual(before);
   });
 });
+
+describe('canBook - regression tests for the provided buggy code', () => {
+  test('BUG-A AC4: request touching a booking on both sides (660-700 between 600-660 and 700-760) is accepted', () => {
+    const input = {
+      start: 660,
+      end: 700,
+      now: 540,
+      blocked: false,
+      bookings: [
+        { start: 600, end: 660 },
+        { start: 700, end: 760 },
+      ],
+    };
+    expect(canBook(input)).toBe(true);
+  });
+
+  test('BUG-B AC5: an Available request that touches nothing (720-780) leaves the bookings unchanged', () => {
+    const input = request(720, 780);
+    const before = JSON.stringify(input.bookings);
+
+    expect(canBook(input)).toBe(true);
+
+    expect(JSON.stringify(input.bookings)).toBe(before);
+  });
+});
