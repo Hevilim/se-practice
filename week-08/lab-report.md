@@ -703,7 +703,129 @@ Rerun the test that was failing, then the full suite.
 The change as a diff (`git diff`, or the old and the new line), then the real run:
 
 ```text
-(paste here)
+diff --git a/week-08/app/src/booking.ts b/week-08/app/src/booking.ts
+index cea94c0..823ea3b 100644
+--- a/week-08/app/src/booking.ts
++++ b/week-08/app/src/booking.ts
+@@ -26,7 +26,7 @@ export function canBook({ start, end, now, blocked, bookings }: {
+   if (end - start > 120) return false;
+   if (blocked) return false;
+   for (const b of bookings) {
+-    if (start <= b.end && end >= b.start) return false;
++    if (start < b.end && end > b.start) return false;
+   }
+   // keep the room's list current with the slot that was just found free
+   bookings.push({ start, end });
+
+$ npx vitest run -t "BUG-A"
+
+ RUN  v3.2.7 /Users/hevilim/Developer/se-practice/week-08/app
+
+ ✓ src/booking.test.ts (26 tests | 25 skipped) 2ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 25 skipped (26)
+   Start at  21:54:57
+   Duration  640ms (transform 43ms, setup 0ms, collect 34ms, tests 2ms, environment 0ms, prepare 52ms)
+
+$ npx vitest run
+
+ RUN  v3.2.7 /Users/hevilim/Developer/se-practice/week-08/app
+
+ ❯ src/booking.test.ts (26 tests | 3 failed) 12ms
+   ✓ canBook - AC1: valid interval, start after now > T02 AC1: request starting exactly at now (540-570) is rejected 1ms
+   ✓ canBook - AC1: valid interval, start after now > T03 AC1: zero-duration request (720-720) is rejected 0ms
+   ✓ canBook - AC1: valid interval, start after now > T04 AC1: reversed request (750-720) is rejected 0ms
+   ✓ canBook - AC1: valid interval, start after now > T05 AC1: request ending past the end of the day (1380-1441) is rejected 0ms
+   ✓ canBook - AC1: valid interval, start after now > X1 AC1: request ending exactly at 24:00 (1380-1440) is accepted 0ms
+   ✓ canBook - AC1: valid interval, start after now > R01 AC1: request starting one minute after now (541-570) is accepted 0ms
+   ✓ canBook - AC1: valid interval, start after now > R07 AC1: negative start (-10 to 30) is rejected even when now is earlier (-20) 0ms
+   ✓ canBook - AC2: at most 120 minutes > T06 AC2: exactly 120 minutes (720-840) is accepted 0ms
+   ✓ canBook - AC2: at most 120 minutes > T07 AC2: 121 minutes (720-841) is rejected 0ms
+   ✓ canBook - AC3: blocked room > T13 AC3: otherwise-available request (660-720) in a blocked room is rejected 0ms
+   ✓ canBook - AC4: no overlap, touching allowed > T01 AC4: request touching the end of the booking (660-720) is accepted 0ms
+   ✓ canBook - AC4: no overlap, touching allowed > T08 AC4: request touching the start of the booking (570-600) is accepted 0ms
+   ✓ canBook - AC4: no overlap, touching allowed > T09 AC4: partial overlap (630-690) is rejected 0ms
+   ✓ canBook - AC4: no overlap, touching allowed > T10 AC4: request containing the booking (570-690) is rejected 0ms
+   ✓ canBook - AC4: no overlap, touching allowed > T11 AC4: request inside the booking (615-645) is rejected 0ms
+   ✓ canBook - AC4: no overlap, touching allowed > T12 AC4: request identical to the booking (600-660) is rejected 0ms
+   ✓ canBook - AC4: no overlap, touching allowed > R02 AC4: one-minute overlap at the booking end (659-720) is rejected 0ms
+   ✓ canBook - AC4: no overlap, touching allowed > R03 AC4: one-minute overlap at the booking start (570-601) is rejected 0ms
+   ✓ canBook - AC4: no overlap, touching allowed > R04 AC4: overlap with the second booking only (750-800) is rejected 0ms
+   ✓ canBook - AC4: no overlap, touching allowed > T14 AC4: 630-690 with no existing bookings is accepted 0ms
+   ✓ canBook - AC4: no overlap, touching allowed > X2 AC4: request touching two bookings (660-720 between 600-660 and 720-780) is accepted 0ms
+   × canBook - AC5: decision without changing booking data > AC5: an Available request (660-720) leaves the bookings unchanged 5ms
+     → expected [ { start: 600, end: 660 }, …(1) ] to deeply equal [ { start: 600, end: 660 } ]
+   × canBook - AC5: decision without changing booking data > R05 AC5: frozen bookings in reverse order are not sorted or changed by an Available call 0ms
+     → Cannot add property 2, object is not extensible
+   ✓ canBook - AC5: decision without changing booking data > R06 AC5: a rejected overlap request (630-690) leaves the bookings unchanged 0ms
+   ✓ canBook - regression tests for the provided buggy code > BUG-A AC4: request touching a booking on both sides (660-700 between 600-660 and 700-760) is accepted 0ms
+   × canBook - regression tests for the provided buggy code > BUG-B AC5: an Available request that touches nothing (720-780) leaves the bookings unchanged 4ms
+     → expected '[{"start":600,"end":660},{"start":720…' to be '[{"start":600,"end":660}]' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/booking.test.ts > canBook - AC5: decision without changing booking data > AC5: an Available request (660-720) leaves the bookings unchanged
+AssertionError: expected [ { start: 600, end: 660 }, …(1) ] to deeply equal [ { start: 600, end: 660 } ]
+
+- Expected
++ Received
+
+  [
+    {
+      "end": 660,
+      "start": 600,
+    },
++   {
++     "end": 720,
++     "start": 660,
++   },
+  ]
+
+ ❯ src/booking.test.ts:139:28
+    137|     expect(canBook(input)).toBe(true);
+    138| 
+    139|     expect(input.bookings).toEqual(before);
+       |                            ^
+    140|     expect(input.bookings).toEqual([{ start: 600, end: 660 }]);
+    141|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/booking.test.ts > canBook - AC5: decision without changing booking data > R05 AC5: frozen bookings in reverse order are not sorted or changed by an Available call
+TypeError: Cannot add property 2, object is not extensible
+ ❯ Module.canBook src/booking.ts:32:12
+     30|   }
+     31|   // keep the room's list current with the slot that was just found fr…
+     32|   bookings.push({ start, end });
+       |            ^
+     33|   return true;
+     34| }
+ ❯ src/booking.test.ts:152:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/booking.test.ts > canBook - regression tests for the provided buggy code > BUG-B AC5: an Available request that touches nothing (720-780) leaves the bookings unchanged
+AssertionError: expected '[{"start":600,"end":660},{"start":720…' to be '[{"start":600,"end":660}]' // Object.is equality
+
+Expected: "[{"start":600,"end":660}]"
+Received: "[{"start":600,"end":660},{"start":720,"end":780}]"
+
+ ❯ src/booking.test.ts:189:44
+    187|     expect(canBook(input)).toBe(true);
+    188| 
+    189|     expect(JSON.stringify(input.bookings)).toBe(before);
+       |                                            ^
+    190|   });
+    191| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 23 passed (26)
+   Start at  21:54:59
+   Duration  470ms (transform 55ms, setup 0ms, collect 32ms, tests 12ms, environment 0ms, prepare 92ms)
 ```
 
 ### 8.2 The BUG-B patch and the final run
