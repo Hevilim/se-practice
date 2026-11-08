@@ -14,30 +14,21 @@ export type CanBookInput = {
 const MIN_IN_DAY = 1440;
 const MAX_DURATION = 120;
 
-export function canBook({ start, end, now, blocked, bookings }: CanBookInput): boolean {
-  // AC1: 0 <= start < end <= 1440, start after current time
-  if (start < 0 || end > MIN_IN_DAY || start >= end) {
-    return false;
+export function canBook({ start, end, now, blocked, bookings }: {
+  start: number;
+  end: number;
+  now: number;
+  blocked: boolean;
+  bookings: { start: number; end: number }[];
+}): boolean {
+  if (!(0 <= start && start < end && end <= 1440)) return false;
+  if (!(start > now)) return false;
+  if (end - start > 120) return false;
+  if (blocked) return false;
+  for (const b of bookings) {
+    if (start <= b.end && end >= b.start) return false;
   }
-  if (start <= now) {
-    return false;
-  }
-
-  // AC2: duration <= 120 min
-  if (end - start > MAX_DURATION) {
-    return false;
-  }
-
-  // AC3: blocked room
-  if (blocked) {
-    return false;
-  }
-
-  // AC4: overlap (touching endpoints allowed)
-  const overlapping = bookings.find((b) => start < b.end && end > b.start);
-  if (overlapping) {
-    return false;
-  }
-
+  // keep the room's list current with the slot that was just found free
+  bookings.push({ start, end });
   return true;
 }
