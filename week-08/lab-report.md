@@ -15,7 +15,7 @@ grader find your answers by them. You can add rows to any table, but never remov
 | --- | --- |
 | Assistant I debugged with (tool) | Claude (claude.ai) |
 | Exact model (with its version, or `not displayed`) | Claude Opus 5.5 |
-| Where the skill was installed (ChatGPT / Claude web / Claude Code / prompt-only simulation) | Claude web |
+| Where the skill was installed (ChatGPT / Claude web / Claude Code / prompt-only simulation) | Claude Code |
 | Where I ran the tests (Bolt terminal / my computer / Codespace) | my computer |
 | Vitest version (the `RUN  v…` line of a run) | 3.2.7 |
 | Language of my booking module (`ts` or `js`) — the file I copied from `buggy/` | ts |
@@ -413,6 +413,8 @@ skill as enabled. If upload was not available, write `prompt-only simulation` an
 Screenshot of the result: `evidence/install.png`.
 
 <!-- Write below this line -->
+
+The skill bug-detector was uploaded to my Claude account on 6.11.2026. Claude Code syncs it to ~/.claude/skills/synced/.../bug-detector/SKILL.md, and I used it in Claude Code 2.1.311. The synced copy has the same text as my SKILL.md, only name is written as "bug-detector" in quotes and there is one empty line after the second ---. I did not upload the new ZIP again. In a new claude -p chat I asked which skills it has, and it listed anthropic-skills:bug-detector with its description. In the Task 5 chat the log shows a Skill call for anthropic-skills:bug-detector, so the skill was enabled and used. evidence/install.png shows both.
 
 ---
 
@@ -879,12 +881,12 @@ Use the same IDs as `known_fails` in `submission.yml`. Write `none` if the run i
 
 | Check | Why it stays |
 | --- | --- |
-| | |
+| none | |
 
 ### 9.2 One limitation of AI-assisted debugging
 
 <!-- Use something that actually happened in sections 5-8. 20 words or more. -->
--
+- The assistant only sees what I paste. Both answers proposed the test 540-600 expects true, but in my suite now = 540, so this request is rejected by AC1 even after the fix. The no-skill answer also guessed that the other four failures came from a shared bookings array, but my fixtures are fresh and the real reason was BUG-A. Only running my tests showed this.
 
 ---
 
@@ -899,3 +901,5 @@ Use the same IDs as `known_fails` in `submission.yml`. Write `none` if the run i
      visible after the BUG-A patch: the AC5 test had been failing for the wrong reason." -->
 
 <!-- Write your conclusion below this line -->
+
+The skill helped a little, mostly with the shape of the answer. In section 7 under unsupported claims, the skill answer put the shared array idea under Hypothesis, but the no-skill answer used it to explain the five failures. Both found the same two bugs and gave the same two line patch, and both gave the wrong test 540-600. My tests proved more. The BUG-A test failed on the buggy code and passed after the change from <= and >= to < and >. The BUG-B test 720-780 showed the push, while my Week 07 AC5 test failed for the wrong reason until BUG-A was fixed. The tests do not prove the page, because I did not check the UI again this week.
