@@ -51,23 +51,23 @@ for every test. **The Expected column comes from AC1–AC4, never from the code.
 
 | ID | Candidate / changed input | Expected | AC | Reason (in your words) |
 | --- | --- | --- | --- | --- |
-| T01 | 660–720 (touching after) | true | AC4 | |
-| T02 | 540–570 (starts now) | false | AC1 | |
-| T03 | 720–720 (zero duration) | false | AC1 | |
-| T04 | 750–720 (reversed) | false | AC1 | |
-| T05 | 1380–1441 (past day end) | false | AC1 | |
-| T06 | 720–840 (120 minutes) | true | AC2 | |
-| T07 | 720–841 (121 minutes) | false | AC2 | |
-| T08 | 570–600 (touching before) | true | AC4 | |
-| T09 | 630–690 (partial overlap) | false | AC4 | |
-| T10 | 570–690 (contains booking) | false | AC4 | |
-| T11 | 615–645 (inside booking) | false | AC4 | |
-| T12 | 600–660 (identical interval) | false | AC4 | |
-| T13 | 660–720, blocked = true | false | AC3 | |
-| T14 | 630–690, bookings = [] | true | AC4 | |
-| AC5 | an Available request — the bookings after the call equal the bookings before | true, data unchanged | AC5 | |
-| X1 | | | | |
-| X2 | | | | |
+| T01 | 660–720 (touching after) | true | AC4 | The booking ends at 660 and the request starts at 660. 660 is not inside 600-660, so they only touch. 60 minutes, after now, room open. |
+| T02 | 540–570 (starts now) | false | AC1 | The request starts at 540 and now is 540. AC1 needs start after now, and 540 is equal, not after. |
+| T03 | 720–720 (zero duration) | false | AC1 | Start 720 and end 720 are equal. AC1 needs start < end, so a request of 0 minutes is not a real interval. |
+| T04 | 750–720 (reversed) | false | AC1 | Start 750 is bigger than end 720. AC1 needs start < end, so a reversed interval is not valid. |
+| T05 | 1380–1441 (past day end) | false | AC1 | End 1441 is one minute after midnight. AC1 needs end <= 1440, so the request goes past the end of the day. |
+| T06 | 720–840 (120 minutes) | true | AC2 | 720 to 840 is exactly 120 minutes. AC2 rejects only longer than 120, so 120 is still allowed. No overlap, after now. |
+| T07 | 720–841 (121 minutes) | false | AC2 | 720 to 841 is 121 minutes. This is longer than 120, so AC2 rejects it, even though everything else is fine. |
+| T08 | 570–600 (touching before) | true | AC4 | The request ends at 600 and the booking starts at 600. 600 is not inside both, so they only touch. 570 is after now 540. |
+| T09 | 630–690 (partial overlap) | false | AC4 | 630-690 and 600-660 share the minutes 630-660. This is an overlap, so AC4 rejects it. |
+| T10 | 570–690 (contains booking) | false | AC4 | 570-690 covers the whole booking 600-660, so all 60 booked minutes are shared. AC4 rejects it. |
+| T11 | 615–645 (inside booking) | false | AC4 | 615-645 is fully inside 600-660, so every minute of the request is already booked. AC4 rejects it. |
+| T12 | 600–660 (identical interval) | false | AC4 | 600-660 is the same interval as the booking, so all minutes are shared. AC4 rejects it. |
+| T13 | 660–720, blocked = true | false | AC3 | 660-720 alone would be Available (it only touches the booking), but the room is blocked. AC3 rejects any request in a blocked room. |
+| T14 | 630–690, bookings = [] | true | AC4 | 630-690 would overlap 600-660, but here the room has no bookings. Nothing to overlap, 60 minutes, after now, so it is accepted. |
+| AC5 | an Available request — the bookings after the call equal the bookings before | true, data unchanged | AC5 | 660-720 is Available. AC5 says the check must not change the booking data, so the array must still be [{600, 660}] after the call. |
+| X1 | 1380-1440 (ends exactly at 24:00) | true | AC1 | AC1 allows end <= 1440, so 1440 itself is allowed. 60 minutes, after now, no overlap. This is the other end of the day, T05 only checks 1441. |
+| X2 | 660-720, bookings = [{600, 660}, {720, 780}] (touches two bookings) | true | AC4 | The request touches the first booking at 660 and the second at 720. Touching is allowed by AC4, and there is no shared minute with either one. |
 
 X1 and X2 are **your own two cases**: a boundary or a state that T01–T14 do not reach. Fill all
 five columns.
