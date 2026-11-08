@@ -833,7 +833,40 @@ Received: "[{"start":600,"end":660},{"start":720,"end":780}]"
 The change as a diff, then the real output of the **full** suite. Every test must pass.
 
 ```text
-(paste here)
+diff --git a/week-08/app/src/booking.ts b/week-08/app/src/booking.ts
+index 823ea3b..46ca44c 100644
+--- a/week-08/app/src/booking.ts
++++ b/week-08/app/src/booking.ts
+@@ -28,7 +28,5 @@ export function canBook({ start, end, now, blocked, bookings }: {
+   for (const b of bookings) {
+     if (start < b.end && end > b.start) return false;
+   }
+-  // keep the room's list current with the slot that was just found free
+-  bookings.push({ start, end });
+   return true;
+ }
+
+$ npx vitest run -t "BUG-B"
+
+ RUN  v3.2.7 /Users/hevilim/Developer/se-practice/week-08/app
+
+ ✓ src/booking.test.ts (26 tests | 25 skipped) 4ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 25 skipped (26)
+   Start at  21:55:11
+   Duration  514ms (transform 48ms, setup 0ms, collect 35ms, tests 4ms, environment 0ms, prepare 82ms)
+
+$ npx vitest run
+
+ RUN  v3.2.7 /Users/hevilim/Developer/se-practice/week-08/app
+
+ ✓ src/booking.test.ts (26 tests) 3ms
+
+ Test Files  1 passed (1)
+      Tests  26 passed (26)
+   Start at  21:55:12
+   Duration  379ms (transform 31ms, setup 0ms, collect 29ms, tests 3ms, environment 0ms, prepare 42ms)
 ```
 
 ---
