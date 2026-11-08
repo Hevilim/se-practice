@@ -34,6 +34,15 @@ describe('canBook - AC1: valid interval, start after now', () => {
   test('X1 AC1: request ending exactly at 24:00 (1380-1440) is accepted', () => {
     expect(canBook(request(1380, 1440))).toBe(true);
   });
+
+  test('R01 AC1: request starting one minute after now (541-570) is accepted', () => {
+    expect(canBook(request(541, 570))).toBe(true);
+  });
+
+  test('R07 AC1: negative start (-10 to 30) is rejected even when now is earlier (-20)', () => {
+    const input = { start: -10, end: 30, now: -20, blocked: false, bookings: freshBookings() };
+    expect(canBook(input)).toBe(false);
+  });
 });
 
 describe('canBook - AC2: at most 120 minutes', () => {
@@ -78,6 +87,28 @@ describe('canBook - AC4: no overlap, touching allowed', () => {
     expect(canBook(request(600, 660))).toBe(false);
   });
 
+  test('R02 AC4: one-minute overlap at the booking end (659-720) is rejected', () => {
+    expect(canBook(request(659, 720))).toBe(false);
+  });
+
+  test('R03 AC4: one-minute overlap at the booking start (570-601) is rejected', () => {
+    expect(canBook(request(570, 601))).toBe(false);
+  });
+
+  test('R04 AC4: overlap with the second booking only (750-800) is rejected', () => {
+    const input = {
+      start: 750,
+      end: 800,
+      now: 540,
+      blocked: false,
+      bookings: [
+        { start: 600, end: 660 },
+        { start: 720, end: 780 },
+      ],
+    };
+    expect(canBook(input)).toBe(false);
+  });
+
   test('T14 AC4: 630-690 with no existing bookings is accepted', () => {
     const input = { start: 630, end: 690, now: 540, blocked: false, bookings: [] };
     expect(canBook(input)).toBe(true);
@@ -107,5 +138,29 @@ describe('canBook - AC5: decision without changing booking data', () => {
 
     expect(input.bookings).toEqual(before);
     expect(input.bookings).toEqual([{ start: 600, end: 660 }]);
+  });
+
+  test('R05 AC5: frozen bookings in reverse order are not sorted or changed by an Available call', () => {
+    const bookings = [
+      Object.freeze({ start: 720, end: 780 }),
+      Object.freeze({ start: 600, end: 660 }),
+    ];
+    Object.freeze(bookings);
+    const before = structuredClone(bookings);
+    const input = { start: 660, end: 720, now: 540, blocked: false, bookings };
+
+    expect(canBook(input)).toBe(true);
+
+    expect(input.bookings).toBe(bookings);
+    expect(input.bookings).toEqual(before);
+  });
+
+  test('R06 AC5: a rejected overlap request (630-690) leaves the bookings unchanged', () => {
+    const input = request(630, 690);
+    const before = structuredClone(input.bookings);
+
+    expect(canBook(input)).toBe(false);
+
+    expect(input.bookings).toEqual(before);
   });
 });
