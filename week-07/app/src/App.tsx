@@ -8,6 +8,7 @@ import {
   MapPin,
   XCircle,
 } from "lucide-react";
+import { canBook } from "./booking";
 
 type Booking = {
   id: string;
@@ -110,6 +111,20 @@ function evaluateBooking(
     };
   }
 
+  // The decision itself comes from canBook in src/booking.ts.
+  // The checks below only build the messages for the page.
+  if (
+    canBook({
+      start,
+      end,
+      now: current,
+      blocked: room.blocked,
+      bookings: room.bookings,
+    })
+  ) {
+    return { kind: "available" };
+  }
+
   // AC1: 0 <= start < end <= 1440, start after current time
   if (start < 0 || end > MIN_IN_DAY || start >= end) {
     reasons.push(
@@ -140,11 +155,7 @@ function evaluateBooking(
     );
   }
 
-  if (reasons.length > 0) {
-    return { kind: "unavailable", reasons };
-  }
-
-  return { kind: "available" };
+  return { kind: "unavailable", reasons };
 }
 
 function App() {

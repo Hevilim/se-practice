@@ -1,8 +1,8 @@
 # Week 07 — Lab report
 
-**Name:**
-**Group:**
-**Date:**
+**Name:** Karim Aliyev
+**Group:** Monday 16:00 - 19:00
+**Date:** 6.11.2026
 
 Fill in every section. **Do not delete, rename or renumber the headings.** The checker and the
 grader find your answers by them. You can add rows to any table, but never remove its header.
@@ -13,13 +13,13 @@ grader find your answers by them. You can add rows to any table, but never remov
 
 | | |
 | --- | --- |
-| Project I continue (`week-06` = my Week 06 Bolt project, `starter` = the provided starter) | |
-| Bolt project link (or `not shared`, and why) | |
-| Assistant that generated the tests (tool) | |
-| Exact model (with its version, or `not displayed`) | |
-| Where I ran the tests (Bolt terminal / my computer / Codespace) | |
-| Vitest version (the `RUN  v…` line of a run) | |
-| Test command | |
+| Project I continue (`week-06` = my Week 06 Bolt project, `starter` = the provided starter) | week-06 |
+| Bolt project link (or `not shared`, and why) | https://bolt.new/p/72159062 |
+| Assistant that generated the tests (tool) | Claude (claude.ai) |
+| Exact model (with its version, or `not displayed`) | Claude Opus 5.5 |
+| Where I ran the tests (Bolt terminal / my computer / Codespace) | my computer |
+| Vitest version (the `RUN  v…` line of a run) | 3.2.7 |
+| Test command | npx vitest run |
 
 ---
 
@@ -29,15 +29,17 @@ grader find your answers by them. You can add rows to any table, but never remov
 
 | | |
 | --- | --- |
-| File and function (or "inside the page component") | |
-| Its inputs | |
-| What it returned | |
-| How the page used it | |
+| File and function (or "inside the page component") | src/App.tsx, function evaluateBooking (outside the App component, but in the same file) |
+| Its inputs | the room object (with blocked and bookings), start and end in minutes or null, and the current time in minutes |
+| What it returned | a verdict object: kind available, or kind unavailable with a list of reasons (messages) |
+| How the page used it | App calls it in useMemo with the selected room and the times from the form. ResultCard shows Available, or Unavailable with the reasons. |
 
 **What I changed to extract `canBook`.** Say which file it now lives in, what you moved, and why
 the behaviour did not change. Also say which file of the page now calls it. 40 words or more.
 
 <!-- Write below this line -->
+
+canBook now lives in src/booking.ts. I moved the five checks from evaluateBooking into it: the AC1 interval check, start after now, the 120 minute limit, the blocked room and the overlap check. I copied each condition as it was, with the same signs, so the behaviour did not change. evaluateBooking in src/App.tsx imports canBook and calls it for the decision. If canBook returns true, the page shows Available. If it returns false, the page still builds the same reason messages, and the conversion from HH:MM to minutes stays in the page. I opened the page in the browser after the change. Auditorium B with now 09:00 gave the same results as before: 11:00-12:00 and 12:00-14:00 Available, 10:30-11:30, 12:00-14:01 and 09:00-09:30 Unavailable, and the blocked Innovation Lab Unavailable.
 
 ---
 
