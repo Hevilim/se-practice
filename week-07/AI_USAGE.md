@@ -23,10 +23,11 @@ The same tool, Claude (claude.ai), Claude Opus 5.5, in a separate chat from the 
 **Every terminal output in lab-report.md was pasted from a real run, unedited:** yes
 
 **I can explain every test in my final suite — its input, its expected result and the AC behind
-it — without the assistant:** yes / no
+it — without the assistant:** no
 
 **Anything I accepted from the AI without fully understanding it:**
 <!-- Name the file and the part. An honest entry here costs far less than a blank one that turns out to be untrue. -->
+app/src/booking.test.ts, test R05: the part with Object.freeze. I accepted it from the improvement answer, but I do not fully understand how a frozen array makes a change in canBook throw.
 
 Signed: Karim Aliyev
 Date: 6.11.2026
