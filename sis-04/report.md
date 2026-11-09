@@ -1579,7 +1579,7 @@ export function filterRooms(
 
 | Check | Why it still fails |
 | --- | --- |
-| (write here) | (write here) |
+| none | All 33 checks pass. |
 
 ## 10. AI reflection (Task 6)
 
@@ -1588,4 +1588,12 @@ export function filterRooms(
      incorrect? What did you personally verify? How did tests influence your engineering
      decisions? What would you improve next? -->
 
-(write here)
+This week I gave the assistant the repository map from section 2.1, the six acceptance criteria AC1–AC6, the five new rules F1–F5, and the constraints: no login, no database, no network. I also pasted the full code of booking.ts and App.tsx. I asked for a plan only, with no code and no full rewrite.
+
+Useful: the assistant found the overlap rule written three times, in booking.ts, evaluateBooking() and Timeline(), plus the unused @supabase/supabase-js package and the ?? -1 line disabling the past-time check. Incorrect: step 2 edited canBook, which the brief forbids; the plan’s rooms.test.ts used the page’s ROOMS instead of its own catalogue; and the first filter.test.ts used it() instead of test() and had no unknown-id test.
+
+I checked each point before writing. For F1 I set attendees = 11 and confirmed Room A with 10 seats is excluded. For the INT case, a 660–720 slot only touches the 600–660 booking, so the result is true under AC4. In the switch-a and switch-b screenshots the times are identical but the results differ.
+
+The 26 old tests blocked changes to canBook, so I added a separate reasonsFor() and two tests that it agrees with canBook. The new tests failed first with “Cannot find module ./filter” and “checkRoom is not a function”, then passed once the filter module and checkRoom were written. The suite went from 26/26 to 37/37.
+
+Three things to improve next. The page does not accept 24:00 as an end time. The rules are now written twice, in canBook and in reasonsFor, so one change could break the other. And I still do not fully understand the line matches.find(...) ?? matches[0], so I will read it until I can explain it.

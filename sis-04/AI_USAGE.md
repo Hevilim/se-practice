@@ -29,10 +29,11 @@ Only the terminal color codes were removed.
 **I shared no credentials, keys or private data with any tool:** yes
 
 **Everything I submitted, I can explain and defend in class — including filterRooms, checkRoom and
-why each module exists:** yes / no
+why each module exists:** no
 
 **Anything I accepted from the AI without fully understanding it:**
 <!-- Name the file and the line. An honest entry here costs far less than a blank one that turns out to be untrue. -->
+app/src/App.tsx, the line const room = matches.find((r) => r.id === roomId) ?? matches[0]; I do not fully understand how the selected room changes when it is filtered out.
 
 Signed: Karim Aliyev
 Date: 9.11.2026
