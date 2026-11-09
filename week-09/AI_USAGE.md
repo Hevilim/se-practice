@@ -6,21 +6,21 @@ including anything an AI tool produced.
 
 | Tool | Exact model / plan | Used for | Which files it touched |
 | --- | --- | --- | --- |
-| | | Part 2 — writing the calls for R1, R2, R3 | calls/ (saved by me, unedited) |
-| | | | |
+| Claude (claude.ai) | Claude Opus 5.5 | Part 2 — writing the calls for R1, R2, R3 | calls/ (saved by Claude, unedited) |
+| Claude (claude.ai) | Claude Opus 5.5 | writing check_room.json, running the checker and the three chats, saving the calls, report text, commits | tool/check_room.json, calls/r1.json, calls/r2.json, calls/r3.txt, lab-report.md, AI_USAGE.md, submission.yml |
 
-**I wrote `tool/check_room.json` myself:** yes / no
-<!-- If an AI wrote or revised any of it, say which part, and how you checked it. -->
+**I wrote `tool/check_room.json` myself:** no
+Claude wrote the whole file. The first version failed S08, so Claude added "required" and "additionalProperties": false to the items of bookings. It was checked with tests/check_tool.py: the final run passes D1 to D6 and S01 to S12.
 
-**I used an AI to explain a JSON Schema keyword or a check:** yes / no
-<!-- If "yes": which one, and for what. -->
+**I used an AI to explain a JSON Schema keyword or a check:** no
 
-**Every reply in `calls/` and in lab-report.md section 4 is exactly what the model returned:** yes / no
+**Every reply in `calls/` and in lab-report.md section 4 is exactly what the model returned:** yes
+The three chats were run with claude -p in Claude Code, each in its own empty folder, with no tools and no access to my files. A first try of the three chats was thrown away, because the R3 answer came in Russian from my Claude Code language setting. The second try used English output and gave the same calls for R1 and R2.
 
-**Every terminal output in lab-report.md was pasted from a real run, unedited:** yes / no
+**Every terminal output in lab-report.md was pasted from a real run, unedited:** yes
 
 **Anything I accepted from the AI without fully understanding it:**
 <!-- Name the file and the part. An honest entry here costs far less than a blank one that turns out to be untrue. -->
 
-Signed: <your name>
-Date:
+Signed: Karim Aliyev
+Date: 9.11.2026
