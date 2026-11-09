@@ -1,0 +1,51 @@
+# week-09/submission.yml — your declaration for this lab.
+#
+# Facts only. Every explanation goes in lab-report.md; nothing here repeats prose.
+# Fill every value. Check it before you push:
+#
+#     python tests/validate_submission.py
+#
+# The validator checks shape, never quality. A green run is the floor, not the grade.
+
+schema: 1
+week: "09"
+
+student:
+  name:
+  student_id:          # as in KBTU records, e.g. 00X000000
+  github:              # your GitHub username, the one that owns the repo
+
+assistant:
+  tool:                # the assistant that wrote the calls in Part 2: ChatGPT, Claude, Gemini, ...
+  model:               # the exact model with its version, or: not displayed
+  fresh_chats:         # yes | no   one fresh chat per request R1, R2, R3
+
+calls:
+  r3:                  # asked | called   what the model did with R3 (calls/r3.txt or calls/r3.json)
+  first_run_s_fails:   # how many of S01-S12 FAILED on your FIRST checker run (lab-report.md section 3)
+
+checker:
+  # Numbers from YOUR last run of: python tests/check_tool.py
+  # They must add up to the number of checks it runs (30). Report them as they came out.
+  # A FAIL you report and explain in lab-report.md costs you nothing. A hidden one costs the criterion.
+  pass:
+  fail:
+  error:
+  commit:              # the commit you ran the checker at: git rev-parse --short HEAD
+                       # (normally the commit just before you commit this file — that is fine)
+  known_fails: []      # every check ID still FAIL or ERROR, explained in lab-report.md §9, e.g. [F6]
+
+review_findings:
+  # Three or more. One line each, and each names what it is about: a case (S01-S12), a request
+  # (R1-R3), an action (A1-A8), an AC, or a field (start, end, now, blocked, bookings).
+  # Worthless:        "The model was accurate"
+  # Worth everything: "R3: the model invented now = 720 and start = 780 instead of asking"
+  -
+  -
+  -
+
+honesty:
+  definition_written_by_me:   # yes | no   tool/check_room.json, as AI_USAGE.md says
+  calls_unedited:             # yes | no   calls/ holds exactly what the model returned
+  outputs_unedited:           # yes | no   every run in lab-report.md is pasted from a real terminal
+  ai_usage_disclosed:         # yes | no   AI_USAGE.md is complete
