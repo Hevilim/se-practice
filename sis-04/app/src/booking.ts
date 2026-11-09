@@ -1,3 +1,5 @@
+import type { Room } from "./rooms";
+
 export type BookingInterval = {
   start: number; // minutes from midnight
   end: number;
@@ -29,4 +31,15 @@ export function canBook({ start, end, now, blocked, bookings }: {
     if (start < b.end && end > b.start) return false;
   }
   return true;
+}
+
+// F3, F5: check the chosen room with its own blocked status and bookings.
+export function checkRoom(
+  rooms: Room[],
+  roomId: string,
+  request: { start: number; end: number; now: number },
+): boolean {
+  const room = rooms.find((r) => r.id === roomId);
+  if (!room) return false;
+  return canBook({ ...request, blocked: room.blocked, bookings: room.bookings });
 }

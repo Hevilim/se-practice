@@ -9,68 +9,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { canBook, MAX_DURATION, MIN_IN_DAY } from "./booking";
-
-type Booking = {
-  id: string;
-  title: string;
-  start: number; // minutes from midnight
-  end: number;
-};
-
-type Room = {
-  id: string;
-  name: string;
-  building: string;
-  capacity: number;
-  blocked: boolean;
-  bookings: Booking[];
-};
-
-const SAMPLE_ROOMS: Room[] = [
-  {
-    id: "r1",
-    name: "Engineering Hall A",
-    building: "Block C · Floor 2",
-    capacity: 40,
-    blocked: false,
-    bookings: [
-      { id: "b1", title: "Algorithms Lecture", start: 540, end: 600 },
-      { id: "b2", title: "Faculty Meeting", start: 780, end: 840 },
-      { id: "b3", title: "Robotics Lab", start: 1080, end: 1140 },
-    ],
-  },
-  {
-    id: "r2",
-    name: "Innovation Lab",
-    building: "Block A · Floor 1",
-    capacity: 24,
-    blocked: true,
-    bookings: [
-      { id: "b4", title: "Maintenance", start: 600, end: 660 },
-    ],
-  },
-  {
-    id: "r3",
-    name: "Library Study Room 3",
-    building: "Library · Floor 3",
-    capacity: 12,
-    blocked: false,
-    bookings: [
-      { id: "b5", title: "Group Study", start: 660, end: 720 },
-      { id: "b6", title: "Book Club", start: 1020, end: 1080 },
-    ],
-  },
-  {
-    id: "r4",
-    name: "Auditorium B",
-    building: "Main Building · Ground",
-    capacity: 200,
-    blocked: false,
-    bookings: [
-      { id: "b7", title: "Guest Lecture", start: 600, end: 660 },
-    ],
-  },
-];
+import { ROOMS, type Room } from "./rooms";
 
 function toMinutes(time: string): number | null {
   if (!/^\d{2}:\d{2}$/.test(time)) return null;
@@ -156,14 +95,14 @@ function evaluateBooking(
 }
 
 function App() {
-  const [roomId, setRoomId] = useState<string>(SAMPLE_ROOMS[0].id);
+  const [roomId, setRoomId] = useState<string>(ROOMS[0].id);
   const [currentStr, setCurrentStr] = useState("09:00");
   const [startStr, setStartStr] = useState("10:00");
   const [endStr, setEndStr] = useState("11:00");
   const [submitted, setSubmitted] = useState(false);
 
   const room = useMemo(
-    () => SAMPLE_ROOMS.find((r) => r.id === roomId),
+    () => ROOMS.find((r) => r.id === roomId),
     [roomId],
   );
 
@@ -230,7 +169,7 @@ function App() {
                   }}
                   className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
                 >
-                  {SAMPLE_ROOMS.map((r) => (
+                  {ROOMS.map((r) => (
                     <option key={r.id} value={r.id}>
                       {r.name} {r.blocked ? "(blocked)" : ""}
                     </option>
@@ -421,7 +360,7 @@ function RoomSchedule({ room, todayLabel }: { room: Room; todayLabel: string }) 
       ) : (
         <ul className="divide-y divide-slate-100">
           {sorted.map((b) => (
-            <li key={b.id} className="flex items-center justify-between py-2 text-sm">
+            <li key={`${b.start}-${b.end}`} className="flex items-center justify-between py-2 text-sm">
               <span className="text-slate-700">{b.title}</span>
               <span className="flex items-center gap-1 text-slate-500 tabular-nums">
                 <Clock className="h-3.5 w-3.5" />
