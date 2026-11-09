@@ -8,7 +8,7 @@ import {
   MapPin,
   XCircle,
 } from "lucide-react";
-import { canBook } from "./booking";
+import { canBook, MAX_DURATION, MIN_IN_DAY } from "./booking";
 
 type Booking = {
   id: string;
@@ -25,9 +25,6 @@ type Room = {
   blocked: boolean;
   bookings: Booking[];
 };
-
-const MIN_IN_DAY = 1440;
-const MAX_DURATION = 120;
 
 const SAMPLE_ROOMS: Room[] = [
   {

@@ -11,8 +11,8 @@ export type CanBookInput = {
   bookings: BookingInterval[];
 };
 
-const MIN_IN_DAY = 1440;
-const MAX_DURATION = 120;
+export const MIN_IN_DAY = 1440;
+export const MAX_DURATION = 120;
 
 export function canBook({ start, end, now, blocked, bookings }: {
   start: number;
