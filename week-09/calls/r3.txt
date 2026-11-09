@@ -1,0 +1,1 @@
+What exact start and end times do you want tomorrow (e.g., 14:00–16:00), and what are the current time, the room's blocked status, and its existing bookings for that day?
