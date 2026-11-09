@@ -3,6 +3,7 @@ import type { Room } from "./rooms";
 export type BookingInterval = {
   start: number; // minutes from midnight
   end: number;
+  title?: string;
 };
 
 export type CanBookInput = {
@@ -42,4 +43,32 @@ export function checkRoom(
   const room = rooms.find((r) => r.id === roomId);
   if (!room) return false;
   return canBook({ ...request, blocked: room.blocked, bookings: room.bookings });
+}
+
+// The first booking that overlaps start-end. Touching endpoints is not an overlap (AC4).
+export function findOverlap<T extends BookingInterval>(
+  start: number,
+  end: number,
+  bookings: T[],
+): T | undefined {
+  return bookings.find((b) => start < b.end && end > b.start);
+}
+
+export type Reason =
+  | { code: "interval" }
+  | { code: "past" }
+  | { code: "too-long" }
+  | { code: "blocked" }
+  | { code: "overlap"; booking: BookingInterval };
+
+// Why a request is Unavailable, for the messages on the page. Empty when canBook is true.
+export function reasonsFor({ start, end, now, blocked, bookings }: CanBookInput): Reason[] {
+  const reasons: Reason[] = [];
+  if (!(0 <= start && start < end && end <= MIN_IN_DAY)) reasons.push({ code: "interval" });
+  if (!(start > now)) reasons.push({ code: "past" });
+  if (end - start > MAX_DURATION) reasons.push({ code: "too-long" });
+  if (blocked) reasons.push({ code: "blocked" });
+  const booking = findOverlap(start, end, bookings);
+  if (booking) reasons.push({ code: "overlap", booking });
+  return reasons;
 }

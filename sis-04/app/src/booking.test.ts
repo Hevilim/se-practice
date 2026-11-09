@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { canBook } from './booking';
+import { canBook, reasonsFor } from './booking';
 import type { BookingInterval, CanBookInput } from './booking';
 
 // Default fixture from the reviewed case table:
@@ -46,11 +46,11 @@ describe('canBook - AC1: valid interval, start after now', () => {
 });
 
 describe('canBook - AC2: at most 120 minutes', () => {
-  test('T06 AC2: exactly 120 minutes (720-840) is accepted', () => {
+  test('T06 B1 AC2: exactly 120 minutes (720-840) is accepted', () => {
     expect(canBook(request(720, 840))).toBe(true);
   });
 
-  test('T07 AC2: 121 minutes (720-841) is rejected', () => {
+  test('T07 B2 AC2: 121 minutes (720-841) is rejected', () => {
     expect(canBook(request(720, 841))).toBe(false);
   });
 });
@@ -63,7 +63,7 @@ describe('canBook - AC3: blocked room', () => {
 });
 
 describe('canBook - AC4: no overlap, touching allowed', () => {
-  test('T01 AC4: request touching the end of the booking (660-720) is accepted', () => {
+  test('T01 B3 AC4: request touching the end of the booking (660-720) is accepted', () => {
     expect(canBook(request(660, 720))).toBe(true);
   });
 
@@ -71,7 +71,7 @@ describe('canBook - AC4: no overlap, touching allowed', () => {
     expect(canBook(request(570, 600))).toBe(true);
   });
 
-  test('T09 AC4: partial overlap (630-690) is rejected', () => {
+  test('T09 B4 AC4: partial overlap (630-690) is rejected', () => {
     expect(canBook(request(630, 690))).toBe(false);
   });
 
@@ -187,5 +187,21 @@ describe('canBook - regression tests for the provided buggy code', () => {
     expect(canBook(input)).toBe(true);
 
     expect(JSON.stringify(input.bookings)).toBe(before);
+  });
+});
+
+describe('reasonsFor - the messages agree with canBook', () => {
+  const bookings = [{ start: 600, end: 660 }];
+
+  test('AC1 AC4: an available request (660-720, touching) has no reasons', () => {
+    const input = { start: 660, end: 720, now: 540, blocked: false, bookings };
+    expect(canBook(input)).toBe(true);
+    expect(reasonsFor(input)).toEqual([]);
+  });
+
+  test('AC1 AC2 AC3 AC4: a request that breaks four rules gets four reasons', () => {
+    const input = { start: 500, end: 650, now: 540, blocked: true, bookings };
+    expect(canBook(input)).toBe(false);
+    expect(reasonsFor(input).map((r) => r.code)).toEqual(['past', 'too-long', 'blocked', 'overlap']);
   });
 });

@@ -1,15 +1,18 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   Building2,
   CalendarClock,
   CheckCircle2,
   Clock,
   DoorClosed,
+  Filter,
   MapPin,
+  SearchX,
   XCircle,
 } from "lucide-react";
-import { canBook, MAX_DURATION, MIN_IN_DAY } from "./booking";
-import { ROOMS, type Room } from "./rooms";
+import { checkRoom, findOverlap, reasonsFor, MAX_DURATION, type Reason } from "./booking";
+import { filterRooms } from "./filter";
+import { EQUIPMENT, NOW, ROOMS, type Room } from "./rooms";
 
 function toMinutes(time: string): number | null {
   if (!/^\d{2}:\d{2}$/.test(time)) return null;
@@ -24,116 +27,89 @@ function toHHMM(min: number): string {
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 }
 
+// Turns the reason codes from booking.ts into text. The rules themselves live in booking.ts.
+function reasonText(reason: Reason): string {
+  switch (reason.code) {
+    case "interval":
+      return "Interval must satisfy 0 ≤ start < end ≤ 24:00. End must be after start.";
+    case "past":
+      return `Start time must be after the current time (${toHHMM(NOW)}).`;
+    case "too-long":
+      return `Booking cannot be longer than ${MAX_DURATION} minutes.`;
+    case "blocked":
+      return "This room is currently blocked and cannot be booked.";
+    case "overlap":
+      return `Overlaps existing booking${reason.booking.title ? ` "${reason.booking.title}"` : ""} (${toHHMM(reason.booking.start)}–${toHHMM(reason.booking.end)}).`;
+  }
+}
+
 type Verdict =
   | { kind: "available" }
   | { kind: "unavailable"; reasons: string[] };
 
-function evaluateBooking(
-  room: Room | undefined,
-  start: number | null,
-  end: number | null,
-  current: number,
-): Verdict {
-  const reasons: string[] = [];
-
-  if (!room) {
-    return { kind: "unavailable", reasons: ["Select a room to check."] };
-  }
-
+function evaluate(room: Room, start: number | null, end: number | null): Verdict {
   if (start === null || end === null) {
     return {
       kind: "unavailable",
       reasons: ["Enter valid start and end times in HH:MM format."],
     };
   }
-
-  // The decision itself comes from canBook in src/booking.ts.
-  // The checks below only build the messages for the page.
-  if (
-    canBook({
-      start,
-      end,
-      now: current,
-      blocked: room.blocked,
-      bookings: room.bookings,
-    })
-  ) {
+  // The decision comes from checkRoom, with the chosen room's own data (F3, F5).
+  if (checkRoom(ROOMS, room.id, { start, end, now: NOW })) {
     return { kind: "available" };
   }
-
-  // AC1: 0 <= start < end <= 1440, start after current time
-  if (start < 0 || end > MIN_IN_DAY || start >= end) {
-    reasons.push(
-      "Interval must satisfy 0 ≤ start < end ≤ 24:00. End must be after start.",
-    );
-  }
-  if (start <= current) {
-    reasons.push("Start time must be after the current time.");
-  }
-
-  // AC2: duration <= 120 min
-  if (end - start > MAX_DURATION) {
-    reasons.push("Booking cannot be longer than 120 minutes.");
-  }
-
-  // AC3: blocked room
-  if (room.blocked) {
-    reasons.push("This room is currently blocked and cannot be booked.");
-  }
-
-  // AC4: overlap (touching endpoints allowed)
-  const overlapping = room.bookings.find(
-    (b) => start < b.end && end > b.start,
-  );
-  if (overlapping) {
-    reasons.push(
-      `Overlaps existing booking "${overlapping.title}" (${toHHMM(overlapping.start)}–${toHHMM(overlapping.end)}).`,
-    );
-  }
-
-  return { kind: "unavailable", reasons };
+  const reasons = reasonsFor({
+    start,
+    end,
+    now: NOW,
+    blocked: room.blocked,
+    bookings: room.bookings,
+  });
+  return { kind: "unavailable", reasons: reasons.map(reasonText) };
 }
 
+const DEFAULTS = { attendees: "1", start: "10:00", end: "11:00" };
+const DAY_LABEL = "Monday, 16 Nov (demo day)";
+
+const inputClass =
+  "w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500";
+
 function App() {
+  const [attendeesStr, setAttendeesStr] = useState(DEFAULTS.attendees);
+  const [selected, setSelected] = useState<string[]>([]);
   const [roomId, setRoomId] = useState<string>(ROOMS[0].id);
-  const [currentStr, setCurrentStr] = useState("09:00");
-  const [startStr, setStartStr] = useState("10:00");
-  const [endStr, setEndStr] = useState("11:00");
-  const [submitted, setSubmitted] = useState(false);
+  const [startStr, setStartStr] = useState(DEFAULTS.start);
+  const [endStr, setEndStr] = useState(DEFAULTS.end);
 
-  const room = useMemo(
-    () => ROOMS.find((r) => r.id === roomId),
-    [roomId],
-  );
+  const attendees = Number(attendeesStr) || 0;
+  const matches = filterRooms(ROOMS, { attendees, equipment: selected });
 
-  const current = toMinutes(currentStr) ?? -1;
+  // If the chosen room is filtered out, the first match is shown instead (F5).
+  const room = matches.find((r) => r.id === roomId) ?? matches[0];
+
   const start = toMinutes(startStr);
   const end = toMinutes(endStr);
+  const verdict = room ? evaluate(room, start, end) : null;
 
-  const verdict = useMemo(
-    () => evaluateBooking(room, start, end, current),
-    [room, start, end, current],
-  );
-
-  const check = () => setSubmitted(true);
+  const toggle = (item: string) =>
+    setSelected((prev) =>
+      prev.includes(item) ? prev.filter((x) => x !== item) : [...prev, item],
+    );
 
   const reset = () => {
-    setSubmitted(false);
+    setAttendeesStr(DEFAULTS.attendees);
+    setSelected([]);
+    setRoomId(ROOMS[0].id);
+    setStartStr(DEFAULTS.start);
+    setEndStr(DEFAULTS.end);
   };
-
-  const dayNow = new Date();
-  const todayLabel = dayNow.toLocaleDateString(undefined, {
-    weekday: "long",
-    month: "short",
-    day: "numeric",
-  });
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800">
       {/* Header */}
       <header className="bg-white border-b border-slate-200">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-sky-600 text-white flex items-center justify-center shadow-sm">
+          <div className="h-10 w-10 rounded-xl bg-sky-600 text-white flex items-center justify-center shadow-sm shrink-0">
             <Building2 className="h-5 w-5" />
           </div>
           <div>
@@ -141,7 +117,7 @@ function App() {
               Smart Campus Room Availability
             </h1>
             <p className="text-sm text-slate-500">
-              Check whether a campus room is free for your requested time slot.
+              Filter the rooms, choose one and check your time slot.
             </p>
           </div>
         </div>
@@ -149,113 +125,115 @@ function App() {
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 grid gap-6 lg:grid-cols-5">
         {/* Form column */}
-        <section className="lg:col-span-2">
+        <section className="lg:col-span-2 space-y-6">
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6">
             <div className="flex items-center gap-2 mb-5">
-              <CalendarClock className="h-4 w-4 text-sky-600" />
-              <h2 className="font-semibold text-slate-900">Check a slot</h2>
+              <Filter className="h-4 w-4 text-sky-600" />
+              <h2 className="font-semibold text-slate-900">Room requirements</h2>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Room
-                </label>
-                <select
-                  value={roomId}
-                  onChange={(e) => {
-                    setRoomId(e.target.value);
-                    setSubmitted(false);
-                  }}
-                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
-                >
-                  {ROOMS.map((r) => (
-                    <option key={r.id} value={r.id}>
-                      {r.name} {r.blocked ? "(blocked)" : ""}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Current time (HH:MM)
+                <label htmlFor="attendees" className="block text-sm font-medium text-slate-700 mb-1">
+                  Attendees
                 </label>
                 <input
-                  type="time"
-                  value={currentStr}
-                  onChange={(e) => {
-                    setCurrentStr(e.target.value);
-                    setSubmitted(false);
-                  }}
-                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  id="attendees"
+                  type="number"
+                  min={1}
+                  value={attendeesStr}
+                  onChange={(e) => setAttendeesStr(e.target.value)}
+                  className={inputClass}
                 />
               </div>
 
+              <fieldset>
+                <legend className="block text-sm font-medium text-slate-700 mb-2">
+                  Required equipment
+                </legend>
+                <div className="grid grid-cols-2 gap-2">
+                  {EQUIPMENT.map((item) => (
+                    <label
+                      key={item}
+                      className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm cursor-pointer hover:bg-slate-50"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selected.includes(item)}
+                        onChange={() => toggle(item)}
+                        className="accent-sky-600"
+                      />
+                      {item}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6">
+            <div className="flex items-center gap-2 mb-5">
+              <CalendarClock className="h-4 w-4 text-sky-600" />
+              <h2 className="font-semibold text-slate-900">Time slot</h2>
+            </div>
+
+            <div className="space-y-4">
+              <p className="text-sm text-slate-600">
+                Current time: <span className="font-semibold tabular-nums">{toHHMM(NOW)}</span>
+              </p>
+
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                  <label htmlFor="start" className="block text-sm font-medium text-slate-700 mb-1">
                     Start
                   </label>
                   <input
+                    id="start"
                     type="time"
                     value={startStr}
-                    onChange={(e) => {
-                      setStartStr(e.target.value);
-                      setSubmitted(false);
-                    }}
-                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    onChange={(e) => setStartStr(e.target.value)}
+                    className={inputClass}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                  <label htmlFor="end" className="block text-sm font-medium text-slate-700 mb-1">
                     End
                   </label>
                   <input
+                    id="end"
                     type="time"
                     value={endStr}
-                    onChange={(e) => {
-                      setEndStr(e.target.value);
-                      setSubmitted(false);
-                    }}
-                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    onChange={(e) => setEndStr(e.target.value)}
+                    className={inputClass}
                   />
                 </div>
               </div>
 
-              <div className="flex gap-2 pt-1">
-                <button
-                  onClick={check}
-                  className="flex-1 rounded-lg bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-sky-700 active:bg-sky-800 transition-colors"
-                >
-                  Check availability
-                </button>
-                <button
-                  onClick={reset}
-                  className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
-                >
-                  Reset
-                </button>
-              </div>
+              <button
+                onClick={reset}
+                className="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+              >
+                Reset
+              </button>
             </div>
           </div>
         </section>
 
-        {/* Result + schedule column */}
+        {/* Rooms, result and schedule column */}
         <section className="lg:col-span-3 space-y-6">
-          {submitted ? (
-            <ResultCard verdict={verdict} room={room} start={start} end={end} />
+          {matches.length === 0 ? (
+            <EmptyState />
           ) : (
-            <div className="bg-white rounded-2xl border border-dashed border-slate-300 p-8 text-center text-slate-500 text-sm">
-              Fill in the form and press{" "}
-              <span className="font-semibold text-slate-700">
-                Check availability
-              </span>{" "}
-              to see the result.
-            </div>
+            <>
+              <RoomList rooms={matches} selectedId={room?.id} onSelect={setRoomId} />
+              <div aria-live="polite">
+                {room && verdict && (
+                  <ResultCard verdict={verdict} room={room} start={start} end={end} />
+                )}
+              </div>
+              {room && <RoomSchedule room={room} todayLabel={DAY_LABEL} />}
+            </>
           )}
-
-          {room && <RoomSchedule room={room} todayLabel={todayLabel} />}
         </section>
       </main>
 
@@ -267,6 +245,63 @@ function App() {
   );
 }
 
+function EmptyState() {
+  return (
+    <div className="bg-white rounded-2xl border border-dashed border-slate-300 p-8 text-center">
+      <SearchX className="h-8 w-8 text-slate-400 mx-auto mb-3" />
+      <h3 className="font-semibold text-slate-900">No rooms match your requirements</h3>
+      <p className="text-sm text-slate-500 mt-1">
+        Try fewer attendees or less equipment.
+      </p>
+    </div>
+  );
+}
+
+function RoomList({
+  rooms,
+  selectedId,
+  onSelect,
+}: {
+  rooms: Room[];
+  selectedId: string | undefined;
+  onSelect: (id: string) => void;
+}) {
+  return (
+    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6">
+      <h2 className="font-semibold text-slate-900 mb-3">
+        Matching rooms <span className="text-slate-400 font-normal">({rooms.length})</span>
+      </h2>
+      <ul className="grid gap-2 sm:grid-cols-2">
+        {rooms.map((r) => (
+          <li key={r.id}>
+            <button
+              onClick={() => onSelect(r.id)}
+              aria-pressed={r.id === selectedId}
+              className={`w-full text-left rounded-xl border px-3 py-2.5 transition-colors ${
+                r.id === selectedId
+                  ? "border-sky-500 bg-sky-50 ring-1 ring-sky-500"
+                  : "border-slate-200 hover:bg-slate-50"
+              }`}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-sm font-medium text-slate-900">{r.name}</span>
+                {r.blocked && (
+                  <span className="rounded-full bg-rose-100 text-rose-700 px-2 py-0.5 text-xs font-medium">
+                    Blocked
+                  </span>
+                )}
+              </div>
+              <div className="mt-1 text-xs text-slate-500">
+                {r.capacity} seats · {r.equipment.join(", ")}
+              </div>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 function ResultCard({
   verdict,
   room,
@@ -274,7 +309,7 @@ function ResultCard({
   end,
 }: {
   verdict: Verdict;
-  room: Room | undefined;
+  room: Room;
   start: number | null;
   end: number | null;
 }) {
@@ -286,7 +321,7 @@ function ResultCard({
           <div>
             <h3 className="font-semibold text-emerald-900">Available</h3>
             <p className="text-sm text-emerald-800 mt-1">
-              {room?.name} is free from {toHHMM(start ?? 0)} to{" "}
+              {room.name} is free from {toHHMM(start ?? 0)} to{" "}
               {toHHMM(end ?? 0)}. You can proceed with this booking.
             </p>
           </div>
@@ -295,23 +330,14 @@ function ResultCard({
     );
   }
 
-  const palette = {
-    border: "border-rose-200",
-    bg: "bg-rose-50",
-    icon: "text-rose-600",
-    title: "text-rose-900",
-    body: "text-rose-800",
-    Icon: XCircle,
-    label: "Unavailable",
-  };
-
   return (
-    <div className={`rounded-2xl border ${palette.border} ${palette.bg} p-5 sm:p-6 shadow-sm`}>
+    <div className="rounded-2xl border border-rose-200 bg-rose-50 p-5 sm:p-6 shadow-sm">
       <div className="flex items-start gap-3">
-        <palette.Icon className={`h-6 w-6 ${palette.icon} mt-0.5 shrink-0`} />
+        <XCircle className="h-6 w-6 text-rose-600 mt-0.5 shrink-0" />
         <div className="w-full">
-          <h3 className={`font-semibold ${palette.title}`}>{palette.label}</h3>
-          <ul className={`mt-2 text-sm ${palette.body} space-y-1.5 list-disc list-inside`}>
+          <h3 className="font-semibold text-rose-900">Unavailable</h3>
+          <p className="text-sm text-rose-800 mt-1">{room.name}:</p>
+          <ul className="mt-2 text-sm text-rose-800 space-y-1.5 list-disc list-inside">
             {verdict.reasons.map((r, i) => (
               <li key={i}>{r}</li>
             ))}
@@ -335,7 +361,7 @@ function RoomSchedule({ room, todayLabel }: { room: Room; todayLabel: string }) 
       </div>
 
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 mb-4">
-        <span>{room.building}</span>
+        {room.building && <span>{room.building}</span>}
         <span className="flex items-center gap-1">
           <DoorClosed className="h-3.5 w-3.5" /> Seats {room.capacity}
         </span>
@@ -382,12 +408,9 @@ function Timeline({ room }: { room: Room }) {
         {blocks.map((h) => {
           const start = h * 60;
           const end = start + 60;
-          const booking = room.bookings.find(
-            (b) => start < b.end && end > b.start,
-          );
-          const blockedSeg = room.blocked;
+          const booking = findOverlap(start, end, room.bookings);
           let cls = "bg-emerald-100 hover:bg-emerald-200";
-          if (blockedSeg) cls = "bg-rose-200 hover:bg-rose-300";
+          if (room.blocked) cls = "bg-rose-200 hover:bg-rose-300";
           else if (booking) cls = "bg-sky-200 hover:bg-sky-300";
           return (
             <div
