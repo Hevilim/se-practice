@@ -21,6 +21,7 @@ The three chats were run with claude -p in Claude Code, each in its own empty fo
 
 **Anything I accepted from the AI without fully understanding it:**
 <!-- Name the file and the part. An honest entry here costs far less than a blank one that turns out to be untrue. -->
+tool/check_room.json: the part with "additionalProperties": false inside the items of bookings. I do not fully understand why it is needed when "required" already fixed S08.
 
 Signed: Karim Aliyev
 Date: 9.11.2026
