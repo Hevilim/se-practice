@@ -1,0 +1,61 @@
+# SIS #04 — the declaration. FACTS ONLY: every explanation stays in report.md.
+#
+# Fill this in LAST, after your final run of the checker, then validate it:
+#     python tests/check_sis.py
+#     python tests/validate_submission.py
+#
+# Your checker numbers are re-run by the instructor at the head of your pull request.
+# Numbers that do not match what that commit produces cost the whole workflow criterion.
+# A FAIL you report honestly — here and under known_fails — costs nothing extra.
+#
+# Format rules: two spaces for indentation, never tabs. Leave the keys exactly as they are.
+
+schema: 1
+assignment: "sis-04"            # do not edit
+
+student:
+  name:                         # as in the university register
+  student_id:                   # e.g. 00X000000
+  group:                        # your group code, as in the timetable
+  github:                       # username only, not a URL
+
+assistant:
+  tool:                         # the assistant you worked with, e.g. ChatGPT (web), Claude.ai, Claude Code
+  model:                        # exactly as in report.md section 1, or: not displayed
+
+project:                        # exactly as in report.md section 1
+  start_from:                   # week-08 | week-07 | sis-03 | starter
+  baseline_commit:              # the commit that brought the starting point in unchanged
+  language:                     # ts | js
+  vitest:                       # the version from the "RUN  v..." line, e.g. 3.2.4
+
+counts:                         # the checker prints most of these under --json "measured"
+  rooms:                        # rooms in ROOMS (src/rooms)
+  tests_original:               # tests in the baseline run, report.md 1.1 (0 if there were none)
+  tests_final:                  # tests in your final test files
+  risks:                        # rows in report.md 3.1
+  exchanges:                    # complete exchanges in report.md section 8
+
+checker:                        # from your LAST run of python tests/check_sis.py
+  pass:
+  fail:
+  error:
+  commit:                       # the commit you ran it at: git rev-parse --short HEAD
+                                # (normally the commit just before you commit this file — that is fine)
+  known_fails: []               # every check still FAIL or ERROR, as in report.md section 9, e.g. [E3]
+
+review_findings:
+  # Three or more. One line each, and each one names what it is about: an F-rule (F1-F5),
+  # an AC (AC1-AC6), a boundary test (B1-B6), INT, or a file.
+  # Worthless:        "The refactoring improved the code"
+  # Worth everything: "F2: the assistant's filter used equipment.some(), so a room with only a projector
+  #                    matched projector + whiteboard; the F2 test caught it"
+  -
+  -
+  -
+
+honesty:
+  baseline_unchanged:           # yes | no   app/ at the baseline commit is the starting point as it was
+  runs_unedited:                # yes | no   every run in report.md is pasted from a real terminal
+  no_invented_metrics:          # yes | no   every number in section 7 was measured as the row says
+  ai_usage_disclosed:           # yes | no   AI_USAGE.md and section 8 are complete

@@ -1,0 +1,5 @@
+' diagrams/after.puml — the same view of your FINAL code. It must show rooms, booking, filter
+' and the UI (App and any components), with an arrow for each import. Replace this stub.
+'
+@startuml
+@enduml
