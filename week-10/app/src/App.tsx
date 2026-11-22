@@ -8,7 +8,7 @@ import {
   MapPin,
   XCircle,
 } from "lucide-react";
-import { canBook } from "./booking";
+import { evaluateBooking, toHHMM, toMinutes, type Verdict } from "./availability";
 
 type Booking = {
   id: string;
@@ -25,9 +25,6 @@ type Room = {
   blocked: boolean;
   bookings: Booking[];
 };
-
-const MIN_IN_DAY = 1440;
-const MAX_DURATION = 120;
 
 const SAMPLE_ROOMS: Room[] = [
   {
@@ -75,89 +72,6 @@ const SAMPLE_ROOMS: Room[] = [
   },
 ];
 
-function toMinutes(time: string): number | null {
-  if (!/^\d{2}:\d{2}$/.test(time)) return null;
-  const [h, m] = time.split(":").map(Number);
-  if (h < 0 || h > 23 || m < 0 || m > 59) return null;
-  return h * 60 + m;
-}
-
-function toHHMM(min: number): string {
-  const h = Math.floor(min / 60);
-  const m = min % 60;
-  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
-}
-
-type Verdict =
-  | { kind: "available" }
-  | { kind: "unavailable"; reasons: string[] };
-
-function evaluateBooking(
-  room: Room | undefined,
-  start: number | null,
-  end: number | null,
-  current: number,
-): Verdict {
-  const reasons: string[] = [];
-
-  if (!room) {
-    return { kind: "unavailable", reasons: ["Select a room to check."] };
-  }
-
-  if (start === null || end === null) {
-    return {
-      kind: "unavailable",
-      reasons: ["Enter valid start and end times in HH:MM format."],
-    };
-  }
-
-  // The decision itself comes from canBook in src/booking.ts.
-  // The checks below only build the messages for the page.
-  if (
-    canBook({
-      start,
-      end,
-      now: current,
-      blocked: room.blocked,
-      bookings: room.bookings,
-    })
-  ) {
-    return { kind: "available" };
-  }
-
-  // AC1: 0 <= start < end <= 1440, start after current time
-  if (start < 0 || end > MIN_IN_DAY || start >= end) {
-    reasons.push(
-      "Interval must satisfy 0 ≤ start < end ≤ 24:00. End must be after start.",
-    );
-  }
-  if (start <= current) {
-    reasons.push("Start time must be after the current time.");
-  }
-
-  // AC2: duration <= 120 min
-  if (end - start > MAX_DURATION) {
-    reasons.push("Booking cannot be longer than 120 minutes.");
-  }
-
-  // AC3: blocked room
-  if (room.blocked) {
-    reasons.push("This room is currently blocked and cannot be booked.");
-  }
-
-  // AC4: overlap (touching endpoints allowed)
-  const overlapping = room.bookings.find(
-    (b) => start < b.end && end > b.start,
-  );
-  if (overlapping) {
-    reasons.push(
-      `Overlaps existing booking "${overlapping.title}" (${toHHMM(overlapping.start)}–${toHHMM(overlapping.end)}).`,
-    );
-  }
-
-  return { kind: "unavailable", reasons };
-}
-
 function App() {
   const [roomId, setRoomId] = useState<string>(SAMPLE_ROOMS[0].id);
   const [currentStr, setCurrentStr] = useState("09:00");
@@ -170,7 +84,7 @@ function App() {
     [roomId],
   );
 
-  const current = toMinutes(currentStr) ?? -1;
+  const current = toMinutes(currentStr);
   const start = toMinutes(startStr);
   const end = toMinutes(endStr);
 
