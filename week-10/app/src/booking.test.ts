@@ -43,6 +43,13 @@ describe('canBook - AC1: valid interval, start after now', () => {
     const input = { start: -10, end: 30, now: -20, blocked: false, bookings: freshBookings() };
     expect(canBook(input)).toBe(false);
   });
+
+  // App.tsx sends now = -1 when the "Current time" field is empty (toMinutes(...) ?? -1).
+  // Without a real current time, AC1 cannot tell whether 08:00-08:30 is in the past.
+  test('R3 AC1: an unknown current time (now = -1, empty field on the page) gives Unavailable for 08:00-08:30', () => {
+    const input = { start: 480, end: 510, now: -1, blocked: false, bookings: freshBookings() };
+    expect(canBook(input)).toBe(false);
+  });
 });
 
 describe('canBook - AC2: at most 120 minutes', () => {
