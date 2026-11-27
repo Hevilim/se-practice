@@ -1,0 +1,79 @@
+# week-11/submission.yml — your declaration for this lab.
+#
+# Facts only. Every explanation goes in lab-report.md; nothing here repeats prose.
+# Fill every value. Check it before you push:
+#
+#     python tests/validate_submission.py
+#
+# The validator checks shape, never quality. A green run is the floor, not the grade.
+# If you cannot run Python, fill the file by hand against the comments — a malformed
+# file costs you nothing if the content is there.
+
+schema: 1
+week: "11"
+
+student:
+  name: Karim Aliyev
+  student_id: 24B031620  # as in KBTU records, e.g. 00X000000
+  github: Hevilim        # your GitHub username, the one that owns the repo
+
+assistant:
+  tool: Claude Code     # the assistant that built the feature: Bolt.new, Claude Code, Cursor, ...
+  model: Claude Opus 5.5 # its exact model with its version, or: not displayed
+  environment: claude-code         # bolt | claude-code | cursor | copilot | chat | other
+
+reviewer:
+  tool: Claude Code     # the assistant that reviewed in Task 6
+  model: Claude Sonnet 5.5 # its exact model with its version, or: not displayed
+  same_model_as_builder: no # yes | no
+
+project:
+  starting_point: week-10 # week-10 | week-08
+  baseline_commit: 8172bb4 # the checkpoint of Part 0: git rev-parse --short HEAD after "baseline from week 10"
+  language: ts         # ts | js   the language of your booking and explain modules
+  vitest: 3.2.7        # the Vitest version from the "RUN  v..." line, e.g. 3.2.4
+
+feature:
+  adapter: mock        # mock | mock-and-server   (server = a real model behind your own server, optional)
+  timeout_ms: 2000     # the timeout explainAvailability uses
+  prompt_chosen: B     # A | B | C   from lab-report.md §5.4
+
+counts:
+  tests_baseline: 29   # the total of the §2.2 run
+  tests_final: 109     # the total of the §8.3 run
+  cases_run: 9        # rows E1-E9 in §6.1 with verdict pass or fail
+  findings_verified: 7 # rows in §7.3
+  findings_confirmed: 6 # of those, how many are confirmed
+
+decision:
+  fixed: [V1, V2]            # the two finding IDs you fixed in §8, e.g. [V1, V2]
+  demo_ready: yes     # yes | no   from §8.4
+
+checker:
+  # Numbers from YOUR last run of: python tests/check_feature.py
+  # They must add up to the number of checks it runs (27).
+  # Report them as they came out.
+  # A FAIL you report and explain in lab-report.md costs you nothing extra. A hidden one costs the criterion.
+  pass: 27
+  fail: 0
+  error: 0
+  commit: a1ff3d1      # the commit you ran the checker at: git rev-parse --short HEAD
+                       # (normally the commit just before you commit this file — that is fine)
+  known_fails: []      # every check ID that is still FAIL or ERROR, explained in lab-report.md §9, e.g. [E2]
+
+review_findings:
+  # Three or more. One line each, and each one names what it is about: a finding ID (V1...),
+  # a test case (E1-E9), a criterion (F1-F5, AC1-AC6), a reason code, or a file.
+  # Worthless:        "The reviewer found some issues that were not real"
+  # Worth everything: "V3: the reviewer said roomLabel allows prompt injection; App.tsx takes it from a fixed list - unsupported"
+  - "V1: the reviewer said validateOutput ignores reasonCode, so 'blocked' for an overlap passes; test V1 failed before the fix - confirmed and fixed"
+  - "V2: the reviewer said the mock calls a missing current time an invalid interval while the status card asks for the current time; test V2 failed before the fix - confirmed and fixed"
+  - "V4: the reviewer only called it a hypothesis that 'not available. It is open.' passes the F2 check; a temporary test showed it passes - confirmed, still open"
+  - "V5: the reviewer said an old explain call can set a result after the Simulate API failure box changes in App.tsx; the mock answers at once, so I could not show it - plausible"
+
+honesty:
+  changes_reviewed_by_me: no     # yes | no   every changed file in §4.2 decided by you
+  no_key_in_browser: yes        # yes | no   no key, token or provider call in app/src/
+  review_was_read_only: yes     # yes | no   the Task 6 review edited nothing
+  outputs_unedited: yes         # yes | no   every run in lab-report.md is pasted from a real terminal
+  ai_usage_disclosed: yes       # yes | no   AI_USAGE.md is complete
