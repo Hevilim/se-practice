@@ -704,7 +704,7 @@ Use the same IDs as `known_fails` in `submission.yml`. Write `none` if the run i
 
 | Check | Why it stays |
 | --- | --- |
-| none | |
+| L12 | Section 10 must be written in my own words without the assistant. Claude Code did the rest of the lab, so it did not write the reflection. I will add it myself in a separate commit |
 
 ---
 
