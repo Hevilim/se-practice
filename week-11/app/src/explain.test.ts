@@ -358,3 +358,11 @@ describe('E1-E9 - the deck cases', () => {
     });
   });
 });
+
+describe('review fixes', () => {
+  test('V1 F2: a model that gives the reason of another code is replaced by the fallback', async () => {
+    const data = unavailable('overlap');
+    const result = await explainAvailability(data, says('The room is not available because the room is blocked.'), 1000);
+    expect(result).toMatchObject({ source: 'fallback', cause: 'invalid_output' });
+  });
+});

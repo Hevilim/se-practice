@@ -75,6 +75,17 @@ const POSITIVE_CLAIM = /\b(?:(?:is|are|it's) (?:still )?(?:available|free|bookab
 // The model may never claim to have changed or made a booking.
 const ACTION_CLAIM =
   /\b(?:confirmed|(?:i|we) (?:have |'ve )?(?:booked|reserved|cancell?ed|changed)|i've booked|we've booked|booking (?:is|has been) (?:made|created|cancell?ed))\b/i;
+// Words that name the reason of each unavailable code. A text may not give the reason of another code.
+const REASON_WORDS: Record<Exclude<ReasonCode, "available">, RegExp> = {
+  invalid_time: /\b(?:invalid|not valid)\b/i,
+  past_time: /\b(?:in the past|not after the current time)\b/i,
+  too_long: /\b(?:too long|longer than)\b/i,
+  room_blocked: /\bblocked\b/i,
+  overlap: /\b(?:overlap(?:s|ping)?|clash(?:es)?)\b/i,
+};
+function namesOtherReason(text: string, reasonCode: ReasonCode): boolean {
+  return Object.entries(REASON_WORDS).some(([code, words]) => code !== reasonCode && words.test(text));
+}
 const CLOCK_TIME = /\b(\d{1,2})[:.](\d{2})\b/g;
 const AM_PM_TIME = /\b\d{1,2}\s*(?:am|pm|a\.m\.|p\.m\.)/i;
 
@@ -101,7 +112,7 @@ export function validateOutput(raw: unknown, input: ExplainInput): string | null
   if (input.isAvailable) {
     if (!POSITIVE_WORDS.test(body) || NEGATIVE.test(body) || PROBLEM_WORDS.test(body)) return null;
   } else {
-    if (!NEGATIVE.test(body) || POSITIVE_CLAIM.test(body)) return null;
+    if (!NEGATIVE.test(body) || POSITIVE_CLAIM.test(body) || namesOtherReason(body, input.reasonCode)) return null;
   }
 
   // Only the requested start and end may appear as times.
