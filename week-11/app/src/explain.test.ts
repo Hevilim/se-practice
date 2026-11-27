@@ -1,5 +1,6 @@
 import { describe, test, expect, vi, afterEach } from 'vitest';
-import { REASON_CODES, type ReasonCode } from './booking';
+import { REASON_CODES, availabilityReason, canBook, type ReasonCode } from './booking';
+import { toHHMM } from './availability';
 import {
   explainAvailability,
   fallbackExplanation,
@@ -258,5 +259,102 @@ describe('F4 - timeout, error or missing key gives a safe fallback', () => {
     const data = code === 'available' ? input() : unavailable(code);
     const text = fallbackExplanation(data);
     expect(validateOutput({ explanation: text }, data)).toBe(text);
+  });
+});
+
+// The deck's cases E1-E9: the booking rules decide, then the explanation is added.
+// Fixture: now 09:00, one booking 10:00-11:00.
+function decide(start: number, end: number, blocked = false): ExplainInput {
+  const request = { start, end, now: 540, blocked, bookings: [{ start: 600, end: 660 }] };
+  return {
+    roomLabel: 'Room 101 (fictional)',
+    start: toHHMM(start),
+    end: toHHMM(end),
+    isAvailable: canBook(request),
+    reasonCode: availabilityReason(request),
+  };
+}
+
+describe('E1-E9 - the deck cases', () => {
+  test('E1 F2: available 11:00-12:00 is explained as available', async () => {
+    const data = decide(660, 720);
+    expect(data.reasonCode).toBe('available');
+    const result = await explainAvailability(data, mockAdapter, 2000);
+    expect(result).toMatchObject({ ok: true, source: 'model', isAvailable: true });
+    if (result.ok) expect(result.explanation).toMatch(/is available/);
+  });
+
+  test('E2 F2: overlap 10:30-11:30 is explained as unavailable and mentions the overlap', async () => {
+    const data = decide(630, 690);
+    expect(data.reasonCode).toBe('overlap');
+    const result = await explainAvailability(data, mockAdapter, 2000);
+    expect(result).toMatchObject({ ok: true, source: 'model', isAvailable: false });
+    if (result.ok) expect(result.explanation).toMatch(/not available.*overlaps/);
+  });
+
+  test('E3 F2: a blocked room gives room_blocked and an unavailable explanation', async () => {
+    const data = decide(660, 720, true);
+    expect(data.reasonCode).toBe('room_blocked');
+    const result = await explainAvailability(data, mockAdapter, 2000);
+    expect(result).toMatchObject({ ok: true, isAvailable: false });
+    if (result.ok) expect(result.explanation).toMatch(/not available.*blocked/);
+  });
+
+  test('E4 F2: invalid time 12:30-12:00 gives invalid_time', async () => {
+    const data = decide(750, 720);
+    expect(data.reasonCode).toBe('invalid_time');
+    const result = await explainAvailability(data, mockAdapter, 2000);
+    expect(result).toMatchObject({ ok: true, isAvailable: false });
+  });
+
+  test('E5 F2: past time 08:00-08:30 at 09:00 gives past_time', async () => {
+    const data = decide(480, 510);
+    expect(data.reasonCode).toBe('past_time');
+    const result = await explainAvailability(data, mockAdapter, 2000);
+    expect(result).toMatchObject({ ok: true, isAvailable: false });
+  });
+
+  test('E6 F3: a blank room label is rejected before the adapter is called', async () => {
+    const adapter = vi.fn(mockAdapter);
+    const result = await explainAvailability({ ...decide(660, 720), roomLabel: '   ' }, adapter, 2000);
+    expect(result).toEqual({ ok: false, error: 'invalid_input' });
+    expect(adapter).not.toHaveBeenCalled();
+  });
+
+  test('E7 F3: a 500-character room label is rejected', async () => {
+    const adapter = vi.fn(mockAdapter);
+    const result = await explainAvailability({ ...decide(660, 720), roomLabel: 'x'.repeat(500) }, adapter, 2000);
+    expect(result).toEqual({ ok: false, error: 'invalid_input' });
+    expect(adapter).not.toHaveBeenCalled();
+  });
+
+  test('E8 F4: an adapter that never answers times out into the fallback', async () => {
+    const data = decide(630, 690);
+    const neverAnswers: ExplainAdapter = () => new Promise(() => {});
+    const startedAt = Date.now();
+    const result = await explainAvailability(data, neverAnswers, 100);
+    expect(Date.now() - startedAt).toBeLessThan(1000);
+    expect(result).toEqual({
+      ok: true,
+      source: 'fallback',
+      cause: 'timeout',
+      isAvailable: false,
+      explanation: fallbackExplanation(data),
+    });
+  });
+
+  test('E9 F4: an adapter that throws (simulated API failure) gives the fallback', async () => {
+    const data = decide(660, 720);
+    const throws: ExplainAdapter = async () => {
+      throw new Error('503 Service Unavailable');
+    };
+    const result = await explainAvailability(data, throws, 2000);
+    expect(result).toEqual({
+      ok: true,
+      source: 'fallback',
+      cause: 'adapter_error',
+      isAvailable: true,
+      explanation: fallbackExplanation(data),
+    });
   });
 });
