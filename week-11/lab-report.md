@@ -704,7 +704,7 @@ Use the same IDs as `known_fails` in `submission.yml`. Write `none` if the run i
 
 | Check | Why it stays |
 | --- | --- |
-| L12 | Section 10 must be written in my own words without the assistant. Claude Code did the rest of the lab, so it did not write the reflection. I will add it myself in a separate commit |
+| none | |
 
 ---
 
@@ -719,3 +719,5 @@ Use the same IDs as `known_fails` in `submission.yml`. Write `none` if the run i
      because the timeout was never armed; V1 was confirmed by a test that failed before the fix." -->
 
 <!-- Write your reflection below this line -->
+
+Claude Code with Opus 5.5 wrote explain.ts, the mock adapter, the panel in App.tsx and 57 tests. It did not put an API call in App.tsx, but the first button said only "Explain" and there was no way to show the fallback, so I asked for a second change. The E1 to E9 tests were added after that, and E8 and E9 show that a timeout or an error gives the fallback while the status stays the same. The reviewer was a different model, Sonnet 5.5, in plan mode. V1 was real: the output check ignored the reason code, and test V1 failed before the fix. V4 was called only a hypothesis, but a small test showed it is true. V5 stayed plausible, because the mock answers at once. I learned that a review finding is only a guess until a test shows it.

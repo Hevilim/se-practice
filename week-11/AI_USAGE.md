@@ -28,7 +28,7 @@ The main Claude Code session verified the findings with tests and by reading the
 
 **I used another assistant as well (to explain an error, to draft text in lab-report.md, …):** yes
 <!-- If "yes": which one, the exact model, and for which section. -->
-Yes: the main Claude Code session (Claude Opus 5.5). It drafted every section of lab-report.md except section 10, and this file.
+Yes: the main Claude Code session (Claude Opus 5.5). It drafted every section of lab-report.md and this file. Section 10 (the reflection) was also written by Claude at my request, not in my own words.
 
 **Every terminal output in lab-report.md was pasted from a real run, unedited:** yes
 In lab-report 4.1 and 5.2 the lines with three backticks inside the pasted answers were removed, so the code blocks do not break. This is said there.
@@ -38,6 +38,7 @@ assistant:** yes / no
 
 **Anything I accepted from the AI without fully understanding it:**
 <!-- Name the file and the part. An honest entry here costs far less than a blank one that turns out to be untrue. -->
+All code in app/src was written and checked by Claude Code. I did not read it line by line myself.
 
 Signed: Karim Aliyev
 Date: 27.11.2026
