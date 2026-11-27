@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { canBook } from './booking';
+import { availabilityReason, canBook } from './booking';
 import type { BookingInterval, CanBookInput } from './booking';
 
 // Default fixture from the reviewed case table:
@@ -194,5 +194,69 @@ describe('canBook - regression tests for the provided buggy code', () => {
     expect(canBook(input)).toBe(true);
 
     expect(JSON.stringify(input.bookings)).toBe(before);
+  });
+});
+
+describe('availabilityReason - one code per decision, same rules and order as canBook', () => {
+  test('invalid_time: reversed request (750-720)', () => {
+    expect(availabilityReason(request(750, 720))).toBe('invalid_time');
+  });
+
+  test('invalid_time: request ending past the end of the day (1380-1441)', () => {
+    expect(availabilityReason(request(1380, 1441))).toBe('invalid_time');
+  });
+
+  test('invalid_time: unknown current time (now = -1)', () => {
+    const input = { start: 480, end: 510, now: -1, blocked: false, bookings: freshBookings() };
+    expect(availabilityReason(input)).toBe('invalid_time');
+  });
+
+  test('past_time: request starting exactly at now (540-570)', () => {
+    expect(availabilityReason(request(540, 570))).toBe('past_time');
+  });
+
+  test('too_long: 121 minutes (720-841)', () => {
+    expect(availabilityReason(request(720, 841))).toBe('too_long');
+  });
+
+  test('room_blocked: otherwise-available request in a blocked room', () => {
+    const input = { start: 660, end: 720, now: 540, blocked: true, bookings: freshBookings() };
+    expect(availabilityReason(input)).toBe('room_blocked');
+  });
+
+  test('overlap: partial overlap (630-690)', () => {
+    expect(availabilityReason(request(630, 690))).toBe('overlap');
+  });
+
+  test('available: touching the end of the booking (660-720)', () => {
+    expect(availabilityReason(request(660, 720))).toBe('available');
+  });
+
+  test('order: a past, too long, blocked, overlapping request reports the first rule (past_time)', () => {
+    const input = { start: 500, end: 700, now: 540, blocked: true, bookings: freshBookings() };
+    expect(availabilityReason(input)).toBe('past_time');
+  });
+
+  test('order: blocked and overlapping reports room_blocked', () => {
+    const input = { start: 630, end: 690, now: 540, blocked: true, bookings: freshBookings() };
+    expect(availabilityReason(input)).toBe('room_blocked');
+  });
+
+  test('F1: canBook is true exactly when availabilityReason is available, over a grid of requests', () => {
+    for (const blocked of [false, true]) {
+      for (let start = 480; start <= 900; start += 15) {
+        for (let end = 480; end <= 900; end += 15) {
+          const input = { start, end, now: 540, blocked, bookings: freshBookings() };
+          expect(canBook(input)).toBe(availabilityReason(input) === 'available');
+        }
+      }
+    }
+  });
+
+  test('AC5: availabilityReason leaves the bookings unchanged', () => {
+    const input = request(630, 690);
+    const before = structuredClone(input.bookings);
+    availabilityReason(input);
+    expect(input.bookings).toEqual(before);
   });
 });

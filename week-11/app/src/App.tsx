@@ -6,9 +6,22 @@ import {
   Clock,
   DoorClosed,
   MapPin,
+  Sparkles,
   XCircle,
 } from "lucide-react";
 import { evaluateBooking, toHHMM, toMinutes, type Verdict } from "./availability";
+import { availabilityReason, canBook } from "./booking";
+import {
+  explainAvailability,
+  mockAdapter,
+  type ExplainAdapter,
+  type ExplainResult,
+} from "./explain";
+
+// Demo only: behaves like a provider call that fails, with no network.
+const failingAdapter: ExplainAdapter = async () => {
+  throw new Error("Simulated API failure");
+};
 
 type Booking = {
   id: string;
@@ -92,6 +105,26 @@ function App() {
     () => evaluateBooking(room, start, end, current),
     [room, start, end, current],
   );
+
+  // Structured input for the optional explanation. Both decision fields come from the
+  // deterministic rules; an empty time field stays as typed so the contract rejects it.
+  const explainInput = useMemo(() => {
+    if (!room) return null;
+    const request = {
+      start: start ?? -1,
+      end: end ?? -1,
+      now: current ?? -1,
+      blocked: room.blocked,
+      bookings: room.bookings,
+    };
+    return {
+      roomLabel: room.name,
+      start: startStr,
+      end: endStr,
+      isAvailable: canBook(request),
+      reasonCode: availabilityReason(request),
+    };
+  }, [room, start, end, current, startStr, endStr]);
 
   const check = () => setSubmitted(true);
 
@@ -222,7 +255,12 @@ function App() {
         {/* Result + schedule column */}
         <section className="lg:col-span-3 space-y-6">
           {submitted ? (
-            <ResultCard verdict={verdict} room={room} start={start} end={end} />
+            <>
+              <ResultCard verdict={verdict} room={room} start={start} end={end} />
+              {explainInput && (
+                <ExplanationPanel key={JSON.stringify(explainInput)} input={explainInput} />
+              )}
+            </>
           ) : (
             <div className="bg-white rounded-2xl border border-dashed border-slate-300 p-8 text-center text-slate-500 text-sm">
               Fill in the form and press{" "}
@@ -296,6 +334,76 @@ function ResultCard({
           </ul>
         </div>
       </div>
+    </div>
+  );
+}
+
+// F5: the explanation is optional, visually separate from the status card above, and
+// labelled as generated text. It never decides availability; the status card does.
+function ExplanationPanel({ input }: { input: unknown }) {
+  const [result, setResult] = useState<ExplainResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [simulateFailure, setSimulateFailure] = useState(false);
+
+  const explain = async () => {
+    setLoading(true);
+    const adapter = simulateFailure ? failingAdapter : mockAdapter;
+    setResult(await explainAvailability(input, adapter, 2000));
+    setLoading(false);
+  };
+
+  return (
+    <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-5 sm:p-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <Sparkles className="h-4 w-4 text-violet-600" />
+          <h3 className="font-semibold text-slate-900">Explain availability</h3>
+          <span className="text-xs text-slate-400">(optional)</span>
+        </div>
+        <button
+          onClick={explain}
+          disabled={loading}
+          className="rounded-lg border border-violet-300 px-3 py-1.5 text-sm font-semibold text-violet-700 hover:bg-violet-50 disabled:opacity-50 transition-colors"
+        >
+          Explain availability
+        </button>
+      </div>
+
+      <label className="mt-3 flex items-center gap-2 text-sm text-slate-600">
+        <input
+          type="checkbox"
+          checked={simulateFailure}
+          onChange={(e) => {
+            setSimulateFailure(e.target.checked);
+            setResult(null);
+          }}
+          className="h-4 w-4 rounded border-slate-300 text-violet-600 focus:ring-violet-500"
+        />
+        Simulate API failure
+      </label>
+
+      {result && (
+        <div className="mt-4" aria-live="polite">
+          {result.ok ? (
+            <>
+              <p className="text-xs font-medium uppercase tracking-wide text-violet-700">
+                {result.source === "model"
+                  ? "Generated explanation (mock), not a booking decision"
+                  : "Standard explanation (fallback): the generated explanation was not available"}
+              </p>
+              <p className="mt-1 text-sm text-slate-700">{result.explanation}</p>
+            </>
+          ) : (
+            <p className="text-sm text-slate-500">
+              No explanation: the request details are incomplete or invalid. The status above still
+              applies.
+            </p>
+          )}
+          <p className="mt-2 text-xs text-slate-400">
+            The booking status above is decided by the booking rules only.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

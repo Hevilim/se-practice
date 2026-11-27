@@ -50,6 +50,34 @@ export function findRejections<B extends BookingInterval>(
   return rejections;
 }
 
+// The six reason codes of the explanation contract, spelled exactly as in the lab README.
+export const REASON_CODES = [
+  "invalid_time",
+  "past_time",
+  "too_long",
+  "room_blocked",
+  "overlap",
+  "available",
+] as const;
+
+export type ReasonCode = (typeof REASON_CODES)[number];
+
+const CODE_FOR_RULE: Record<Rejection["rule"], ReasonCode> = {
+  // An unknown current time is an invalid time input, not a past one.
+  "invalid-now": "invalid_time",
+  "invalid-interval": "invalid_time",
+  "not-after-now": "past_time",
+  "too-long": "too_long",
+  blocked: "room_blocked",
+  overlap: "overlap",
+};
+
+// The first failed rule, in the same order canBook checks them (AC1, AC2, AC3, AC4).
+export function availabilityReason(input: CanBookInput): ReasonCode {
+  const [first] = findRejections(input);
+  return first ? CODE_FOR_RULE[first.rule] : "available";
+}
+
 export function canBook(input: CanBookInput): boolean {
-  return findRejections(input).length === 0;
+  return availabilityReason(input) === "available";
 }
