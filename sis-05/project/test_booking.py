@@ -76,6 +76,10 @@ class BookingTests(unittest.TestCase):
         result = can_book(660, 720, 540, True, [])
         self.assertIs(result, False)
 
+    def test_R1_none_blocked_is_rejected(self):
+        result = can_book(660, 720, 540, None, [])
+        self.assertIs(result, False)
+
     # AC4: the other overlap relationships
     def test_touching_start_is_allowed(self):
         result = can_book(570, 600, 540, False, [(600, 660)])

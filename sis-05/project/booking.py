@@ -29,7 +29,7 @@ def can_book(start, end, now, blocked, existing):
             return False
 
         # AC3: the room is not blocked.
-        if blocked:
+        if blocked is not False:
             return False
 
         # AC4: no overlap with any existing booking (half-open intervals).
