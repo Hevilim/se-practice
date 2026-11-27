@@ -1,0 +1,66 @@
+# sis-05/submission.yml — your declaration for this SIS.
+#
+# Facts only. Every explanation goes in report.md; nothing here repeats prose.
+# Fill every value. Check it before you push:
+#
+#     python tests/validate_submission.py
+#
+# The validator checks shape, never quality. A green run is the floor, not the grade.
+# If you cannot run Python, fill the file by hand against the comments — a malformed
+# file costs you nothing if the content is there.
+
+schema: 1
+assignment: "sis-05"            # do not edit
+
+student:
+  name:                         # as in the university register
+  student_id:                   # e.g. 00X000000
+  group:                        # your group code, as in the timetable
+  github:                       # username only, not a URL
+
+assistant:
+  tool:                         # the assistant you worked with, e.g. ChatGPT (web), Claude Code, Bolt.new
+  model:                        # exactly as in report.md section 1, or: not displayed
+
+project:                        # exactly as in report.md section 1
+  name:                         # the project's name
+  language:                     # its main language, e.g. python, typescript, java, go
+  origin:                       # own | smart-campus | other
+  baseline_commit:              # the commit that brought the project in unchanged
+
+counts:                         # the checker prints these under --json "measured"
+  findings:                     # complete rows in report.md 5.2
+  risks:                        # rows in the register, 6.1
+  risks_confirmed:              # of those, how many are confirmed
+  exchanges:                    # complete exchanges in report.md section 11
+
+decision:
+  pattern:                      # applied | not-warranted   from report.md 4.3
+  level:                        # 0 | 1 | 2 | 3   from report.md 7.2
+  top_two: []                   # the IDs from 6.2, highest first, e.g. [R1, R3]
+  mitigated: []                 # the two IDs of 8.1 and 8.2, e.g. [R1, R3]
+  release:                      # go | conditional | no-go
+
+checker:                        # from your LAST run of python tests/check_sis.py
+  pass:
+  fail:
+  error:
+  commit:                       # the commit you ran it at: git rev-parse --short HEAD
+                                # (normally the commit just before you commit this file — that is fine)
+  known_fails: []               # every check still FAIL or ERROR, as in report.md 11.4, e.g. [P6]
+
+review_findings:
+  # Three or more. One line each, and each one names what it is about: a risk ID (R1...),
+  # an acceptance criterion (AC1-AC5), a readiness row (1a-3d), or a file.
+  # Worthless:        "The AI found some risks that were not real"
+  # Worth everything: "R1: splitter.py line 16 evals the shares field; test_R1 failed before the fix - confirmed"
+  -
+  -
+  -
+
+honesty:
+  baseline_unchanged:           # yes | no   project/ at the baseline commit is the project as it was
+  review_was_read_only:         # yes | no   the Task 4 review modified nothing
+  runs_unedited:                # yes | no   every output in report.md is pasted from a real run
+  no_secrets_or_personal_data:  # yes | no   nothing real in sis-05/
+  ai_usage_disclosed:           # yes | no   AI_USAGE.md and section 11 are complete
