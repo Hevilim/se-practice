@@ -6,12 +6,12 @@ def can_book(start, end, now, blocked, existing):
 
     Times are integer minutes after midnight on a single date.
     `existing` holds (start, end) tuples of this room's active bookings.
-    A start or end that is not an integer returns False (lab-report §9.2).
+    A start, end or now that is not an integer returns False (lab-report §9.2).
     Any other bad input also returns False instead of raising an error.
     No input is modified.
     """
     # Outside the contract (lab-report §9.2): reject non-integer times.
-    for value in (start, end):
+    for value in (start, end, now):
         if not isinstance(value, int) or isinstance(value, bool):
             return False
 

@@ -165,3 +165,7 @@ class BookingTests(unittest.TestCase):
     def test_bad_existing_returns_false(self):
         result = can_book(660, 720, 540, False, [(600,)])
         self.assertIs(result, False)
+
+    def test_R2_nan_now_returns_false(self):
+        result = can_book(300, 360, float('nan'), False, [])
+        self.assertIs(result, False)
