@@ -1,8 +1,8 @@
 # SIS #05 — Report
 
-**Name:**
-**Group:**
-**Date:**
+**Name:** Karim Aliyev
+**Group:** Monday 16:00 - 19:00
+**Date:** 27.11.2026
 
 Fill in every section. **Do not delete, rename or renumber the headings.** The checker and the
 grader find your answers by them. You can add rows to any table, but never remove its header.
@@ -13,13 +13,13 @@ grader find your answers by them. You can add rows to any table, but never remov
 
 | | |
 | --- | --- |
-| Project (name, and what it does in one line) | |
-| Language and stack | |
-| Where it comes from (my own / Smart Campus / other: say what) | |
-| Baseline commit — the project brought in unchanged (§3 of the README) | |
-| Assistant (tool) | |
-| Exact model (with its version, or `not displayed`) | |
-| Where I ran the commands (my computer / Codespace / Bolt terminal / …) | |
+| Project (name, and what it does in one line) | Study room booking check: can_book decides if one study room can be booked for a time slot |
+| Language and stack | Python 3 (standard library only), tests with unittest |
+| Where it comes from (my own / Smart Campus / other: say what) | Smart Campus: my own Python version of the booking rule from SIS 03 (sis-03/code). Nothing is copied from my Week 10 or Week 11 worksheets |
+| Baseline commit — the project brought in unchanged (§3 of the README) | dcb636e |
+| Assistant (tool) | Claude Code (the claude command in the terminal) |
+| Exact model (with its version, or `not displayed`) | Claude Opus 5.5 (claude-opus-5-5) |
+| Where I ran the commands (my computer / Codespace / Bolt terminal / …) | my computer (macOS, Python 3.15.2) |
 
 ---
 
@@ -31,11 +31,11 @@ Real paths in `project/`.
 
 | Part | Where (paths) and what it does |
 | --- | --- |
-| Entry points | |
-| Modules | |
-| Dependencies (and where they are declared) | |
-| Tests | |
-| Build / run scripts | |
+| Entry points | project/booking.py: the function can_book(start, end, now, blocked, existing). There is no command line program; it is used by import |
+| Modules | project/booking.py: the booking rule (AC1 to AC4 checks, bad input returns False). project/original/booking_v1.py: the first version of can_book, kept for comparison, nothing imports it |
+| Dependencies (and where they are declared) | None. Only the Python standard library. There is no requirements.txt or pyproject.toml, and the Python version is not declared anywhere |
+| Tests | project/test_booking.py: 35 unittest tests in the class BookingTests |
+| Build / run scripts | None. There is no build step, no script and no Makefile. Tests run with python3 -m unittest |
 
 ### 2.2 Commands
 
@@ -44,16 +44,58 @@ At least three. **Kind:** `test`, `lint`, `type`, `build` or `run`. **Exists:** 
 
 | Command | Kind | Exists | Result | Note |
 | --- | --- | --- | --- | --- |
-| | | | | |
-| | | | | |
-| | | | | |
+| `python3 -m unittest -v` | test | yes | pass | Ran 35 tests, OK. Output in 2.3 |
+| `python3 -m py_compile booking.py test_booking.py` | build | yes | pass | exit code 0. Only a syntax check, there is no real build |
+| `ruff check .` / `flake8` | lint | no | missing | No lint tool is configured or installed (ruff not found, flake8 not found) |
+| `mypy booking.py` | type | no | missing | No type checker, and booking.py has no type hints (No module named mypy) |
+| `python3 booking.py` | run | yes | pass | exit code 0, but it prints nothing: the file only defines a function |
 
 ### 2.3 Baseline output
 
 The **real** output of the baseline test run (or of running the program, if there were no tests):
 
 ```text
-(paste here)
+$ python3 -m unittest -v
+test_bad_existing_returns_false (test_booking.BookingTests.test_bad_existing_returns_false) ... ok
+test_bad_now_returns_false (test_booking.BookingTests.test_bad_now_returns_false) ... ok
+test_blocked_room_is_rejected (test_booking.BookingTests.test_blocked_room_is_rejected) ... ok
+test_blocked_room_with_no_bookings_is_rejected (test_booking.BookingTests.test_blocked_room_with_no_bookings_is_rejected) ... ok
+test_boolean_start_returns_false (test_booking.BookingTests.test_boolean_start_returns_false) ... ok
+test_contains_existing_is_rejected (test_booking.BookingTests.test_contains_existing_is_rejected) ... ok
+test_empty_existing_is_allowed (test_booking.BookingTests.test_empty_existing_is_allowed) ... ok
+test_ends_after_end_of_day_is_rejected (test_booking.BookingTests.test_ends_after_end_of_day_is_rejected) ... ok
+test_ends_exactly_at_end_of_day_is_allowed (test_booking.BookingTests.test_ends_exactly_at_end_of_day_is_allowed) ... ok
+test_exactly_two_hours_is_allowed (test_booking.BookingTests.test_exactly_two_hours_is_allowed) ... ok
+test_existing_unchanged_after_accept (test_booking.BookingTests.test_existing_unchanged_after_accept) ... ok
+test_existing_unchanged_after_reject (test_booking.BookingTests.test_existing_unchanged_after_reject) ... ok
+test_fits_exactly_between_two_bookings_is_allowed (test_booking.BookingTests.test_fits_exactly_between_two_bookings_is_allowed) ... ok
+test_fractional_start_returns_false (test_booking.BookingTests.test_fractional_start_returns_false) ... ok
+test_free_slot_among_three_bookings_is_allowed (test_booking.BookingTests.test_free_slot_among_three_bookings_is_allowed) ... ok
+test_identical_interval_is_rejected (test_booking.BookingTests.test_identical_interval_is_rejected) ... ok
+test_inside_existing_is_rejected (test_booking.BookingTests.test_inside_existing_is_rejected) ... ok
+test_integer_subclass_times_are_allowed (test_booking.BookingTests.test_integer_subclass_times_are_allowed) ... ok
+test_negative_start_is_rejected (test_booking.BookingTests.test_negative_start_is_rejected) ... ok
+test_none_end_returns_false (test_booking.BookingTests.test_none_end_returns_false) ... ok
+test_one_minute_booking_is_allowed (test_booking.BookingTests.test_one_minute_booking_is_allowed) ... ok
+test_over_two_hours_is_rejected (test_booking.BookingTests.test_over_two_hours_is_rejected) ... ok
+test_overlap_is_rejected (test_booking.BookingTests.test_overlap_is_rejected) ... ok
+test_overlap_with_later_booking_in_unsorted_list_is_rejected (test_booking.BookingTests.test_overlap_with_later_booking_in_unsorted_list_is_rejected) ... ok
+test_overlap_with_second_booking_is_rejected (test_booking.BookingTests.test_overlap_with_second_booking_is_rejected) ... ok
+test_partial_overlap_over_start_is_rejected (test_booking.BookingTests.test_partial_overlap_over_start_is_rejected) ... ok
+test_reversed_times_are_rejected (test_booking.BookingTests.test_reversed_times_are_rejected) ... ok
+test_start_in_the_past_is_rejected (test_booking.BookingTests.test_start_in_the_past_is_rejected) ... ok
+test_start_one_minute_after_midnight_now_is_allowed (test_booking.BookingTests.test_start_one_minute_after_midnight_now_is_allowed) ... ok
+test_start_one_minute_after_now_is_allowed (test_booking.BookingTests.test_start_one_minute_after_now_is_allowed) ... ok
+test_starts_now_is_rejected (test_booking.BookingTests.test_starts_now_is_rejected) ... ok
+test_string_start_returns_false (test_booking.BookingTests.test_string_start_returns_false) ... ok
+test_touching_end_is_allowed (test_booking.BookingTests.test_touching_end_is_allowed) ... ok
+test_touching_start_is_allowed (test_booking.BookingTests.test_touching_start_is_allowed) ... ok
+test_zero_length_is_rejected (test_booking.BookingTests.test_zero_length_is_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 35 tests in 0.001s
+
+OK
 ```
 
 ### 2.4 Weaknesses and missing checks
@@ -63,9 +105,12 @@ it) or `assumption` (not yet shown).
 
 | # | Weakness or missing check | Evidence | Kind |
 | --- | --- | --- | --- |
-| 1 | | | |
-| 2 | | | |
-| 3 | | | |
+| 1 | The room is treated as free when blocked is not a real boolean. blocked=None (an unknown state) gives True | booking.py line 32: if blocked. My run: can_book(660, 720, 540, None, []) printed True | fact |
+| 2 | now is never checked. A NaN current time skips the "start after now" rule | booking.py line 24: start <= now is False for NaN. My run: can_book(300, 360, float('nan'), False, []) printed True | fact |
+| 3 | The code points to a document that is not in the project | booking.py lines 9, 13 and 40 say "lab-report §9.2"; there is no lab-report in project/ | fact |
+| 4 | No lint or type check exists | ruff not found, flake8 not found, No module named mypy (2.2) | fact |
+| 5 | The same rule is copied in two files, so a fix in one can be forgotten in the other | original/booking_v1.py lines 11-30 repeat booking.py lines 19-38 | fact |
+| 6 | The broad except (TypeError, ValueError) can hide a real bug inside the checks | booking.py lines 39-41. I did not find a case that hides a bug yet | assumption |
 
 ### 2.5 Acceptance criteria
 
@@ -73,9 +118,11 @@ Three to five things that must still be true after every change, and how you che
 
 | ID | Must remain true | How I check it (a test, a command, a step) |
 | --- | --- | --- |
-| AC1 | | |
-| AC2 | | |
-| AC3 | | |
+| AC1 | A slot is booked only if 0 <= start < end <= 1440 and start is after now | tests test_zero_length_is_rejected, test_ends_after_end_of_day_is_rejected, test_starts_now_is_rejected, test_start_one_minute_after_now_is_allowed |
+| AC2 | A slot longer than 120 minutes is rejected, 120 minutes is allowed | tests test_exactly_two_hours_is_allowed, test_over_two_hours_is_rejected |
+| AC3 | A blocked room is always rejected | tests test_blocked_room_is_rejected, test_blocked_room_with_no_bookings_is_rejected |
+| AC4 | A slot that overlaps a booking is rejected; touching ends is allowed | tests test_overlap_is_rejected, test_touching_end_is_allowed, test_touching_start_is_allowed |
+| AC5 | can_book returns only True or False, never raises an error and never changes existing | tests test_existing_unchanged_after_accept, test_bad_existing_returns_false, and the full run of python3 -m unittest |
 
 ---
 
@@ -85,9 +132,9 @@ Three to five things that must still be true after every change, and how you che
 
 | | |
 | --- | --- |
-| File (`project/AGENTS.md` or `project/CLAUDE.md`) | |
-| Created or improved? | |
-| Does the assistant load it by itself? (`yes` / `no, I pasted it` / `not sure, I pasted it`) | |
+| File (`project/AGENTS.md` or `project/CLAUDE.md`) | project/AGENTS.md |
+| Created or improved? | created (the project had none). Claude Code drafted it (exchange 1); I removed three references to "lab-report §9.2", a file that is not in the project |
+| Does the assistant load it by itself? (`yes` / `no, I pasted it` / `not sure, I pasted it`) | no, I pasted it: Claude Code reads CLAUDE.md, not AGENTS.md, so every prompt after it was written told the assistant to read AGENTS.md first |
 
 ### 3.2 What it covers
 
@@ -95,13 +142,13 @@ Where each topic is in the file (the heading, or the line).
 
 | Topic | Where in the file |
 | --- | --- |
-| Purpose | |
-| Architecture | |
-| Setup | |
-| Safe commands | |
-| Coding conventions | |
-| Test expectations | |
-| Forbidden actions | |
+| Purpose | ## Purpose |
+| Architecture | ## Architecture |
+| Setup | ## Setup |
+| Safe commands | ## Safe commands (python3 -m unittest -v, one test, py_compile, the import example, git status, git diff) |
+| Coding conventions | ## Coding conventions |
+| Test expectations | ## Test expectations |
+| Forbidden actions | ## Forbidden actions (secrets, production deploys, destructive commands, dependency changes without human review, pushing to main) |
 
 ---
 
@@ -111,22 +158,40 @@ Where each topic is in the file (the heading, or the line).
 
 <!-- One problem: the file and lines, and why it makes the code harder to change. Write below this line -->
 
+In project/booking.py lines 18-41, can_book checks all rules in one chain of if statements inside one try block. The limits 1440 and 120 are written inside the conditions (lines 20 and 28). The same chain is copied in project/original/booking_v1.py lines 11-30. To add a new rule, for example opening hours, you must edit the middle of this function.
+
 ### 4.2 The pattern I evaluated
 
 <!-- Strategy, Adapter, or another you can name; what it would change for this problem. Write below this line -->
 
+Strategy: each rule becomes its own small function with the same five arguments, kept in a list, and can_book runs the list in order and returns False at the first rule that fails. A new rule would then be a new function added to the list. I asked Claude Code about it (exchange 2).
+
 ### 4.3 My decision, before and after
 
-**Decision:** applied / not warranted
+**Decision:** not warranted
 
 <!-- Why, and the structure before and after (functions, modules, or a diagram in a code block). Write below this line -->
+
+There are only four checks, each one or two lines, and nothing adds or changes rules while the program runs. Strategy would add five functions, a list and a loop, so the code gets longer but not easier to change: a new rule is still one edit in one file. The order of the checks also matters, and the one try block is simpler with the checks together. The copy in original/booking_v1.py is only for comparison, so a pattern would not remove it. Claude Code also suggested named constants for 1440 and 120; I did not do it, because the README already names both limits and I keep the code unchanged here.
+
+```text
+Before:  booking.py -> can_book() with 4 checks (AC1-AC4) in one try block
+After:   the same. No file in project/ was changed by this decision.
+```
 
 ### 4.4 The acceptance criteria still hold
 
 The real output of the same checks, run after the decision:
 
 ```text
-(paste here)
+$ python3 -m unittest
+...................................
+----------------------------------------------------------------------
+Ran 35 tests in 0.000s
+
+OK
+$ python3 -m py_compile booking.py test_booking.py; echo "exit code $?"
+exit code 0
 ```
 
 ---
