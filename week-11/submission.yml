@@ -54,12 +54,12 @@ checker:
   # They must add up to the number of checks it runs (27).
   # Report them as they came out.
   # A FAIL you report and explain in lab-report.md costs you nothing extra. A hidden one costs the criterion.
-  pass: 26
-  fail: 1
+  pass: 27
+  fail: 0
   error: 0
-  commit: 49555bf      # the commit you ran the checker at: git rev-parse --short HEAD
+  commit: a1ff3d1      # the commit you ran the checker at: git rev-parse --short HEAD
                        # (normally the commit just before you commit this file — that is fine)
-  known_fails: [L12]   # every check ID that is still FAIL or ERROR, explained in lab-report.md §9, e.g. [E2]
+  known_fails: []      # every check ID that is still FAIL or ERROR, explained in lab-report.md §9, e.g. [E2]
 
 review_findings:
   # Three or more. One line each, and each one names what it is about: a finding ID (V1...),
