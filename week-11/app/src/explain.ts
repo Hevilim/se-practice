@@ -150,7 +150,7 @@ export function fallbackExplanation(input: ExplainInput): string {
 
 const MOCK_REASON: Record<ReasonCode, string> = {
   available: "the request passed every booking rule",
-  invalid_time: "the requested times are not a valid interval",
+  invalid_time: "the times are not valid or the current time is not set",
   past_time: "the start is not after the current time",
   too_long: "the request is longer than 120 minutes",
   room_blocked: "the room is blocked",

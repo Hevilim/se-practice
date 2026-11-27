@@ -365,4 +365,18 @@ describe('review fixes', () => {
     const result = await explainAvailability(data, says('The room is not available because the room is blocked.'), 1000);
     expect(result).toMatchObject({ source: 'fallback', cause: 'invalid_output' });
   });
+
+  test('V2 F2: with no current time the mock explanation names the current time, like the status card', async () => {
+    const request = { start: 600, end: 660, now: -1, blocked: false, bookings: [] };
+    const data = {
+      roomLabel: 'Room 101 (fictional)',
+      start: '10:00',
+      end: '11:00',
+      isAvailable: canBook(request),
+      reasonCode: availabilityReason(request),
+    };
+    const result = await explainAvailability(data, mockAdapter, 1000);
+    expect(result).toMatchObject({ source: 'model', isAvailable: false });
+    if (result.ok) expect(result.explanation).toMatch(/current time/);
+  });
 });
